@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "sitebay": {
+      "command": "python",
+      "args": ["-m", "sitebay_mcp.server"],
+      "env": {
+        "SITEBAY_API_TOKEN": "SGzOwbiobD3pf06eeywRRPuGGn_pgDClJMh444DGnig"
+      }
+    }
+  }
+}
