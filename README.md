@@ -1,4 +1,5 @@
 # SiteBay MCP Server
+[![smithery badge](https://smithery.ai/badge/@sitebay/sitebay-mcp)](https://smithery.ai/server/@sitebay/sitebay-mcp)
 
 A Model Context Protocol (MCP) server that provides Claude Code users with direct access to the SiteBay WordPress hosting platform. Manage your hosted WordPress sites, execute server commands, handle staging environments, and more through natural language interactions with the SiteBay cloud infrastructure.
 
@@ -29,6 +30,14 @@ A Model Context Protocol (MCP) server that provides Claude Code users with direc
 - Account and billing information (coming soon)
 
 ## Installation
+
+### Installing via Smithery
+
+To install SiteBay MCP for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@sitebay/sitebay-mcp):
+
+```bash
+npx -y @smithery/cli install @sitebay/sitebay-mcp --client claude
+```
 
 ### Using uvx (Recommended)
 
