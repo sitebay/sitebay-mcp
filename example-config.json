@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "sitebay": {
+      "command": "uvx",
+      "args": ["sitebay-mcp"],
+      "env": {
+        "SITEBAY_API_TOKEN": "your_sitebay_api_token_here"
+      }
+    }
+  }
+}
