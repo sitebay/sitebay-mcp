@@ -3,8 +3,8 @@ Site management tools for SiteBay MCP Server
 """
 
 from typing import Optional, Dict, Any, List
-from ..client import SiteBayClient
-from ..exceptions import SiteBayError
+from sitebay_mcp.client import SiteBayClient
+from sitebay_mcp.exceptions import SiteBayError
 
 
 async def sitebay_list_sites(
@@ -21,7 +21,17 @@ async def sitebay_list_sites(
         Formatted string with site details
     """
     try:
+        if team_id is not None and not isinstance(team_id, str):
+            msg = "team_id must be a string if provided"
+            raise ValueError(msg)
+
         sites = await client.list_sites(team_id=team_id)
+
+        if isinstance(sites, str):
+            return f"Error listing sites: {sites}"
+
+        if not isinstance(sites, list) or not all(isinstance(s, dict) for s in sites):
+            return f"Unexpected response format when listing sites: {sites}"
         
         if not sites:
             return "No sites found for your account."
@@ -42,6 +52,8 @@ async def sitebay_list_sites(
         return result
         
     except SiteBayError as e:
+        return f"Error listing sites: {str(e)}"
+    except ValueError as e:
         return f"Error listing sites: {str(e)}"
 
 
@@ -242,7 +254,10 @@ async def sitebay_delete_site(
     try:
         await client.delete_site(fqdn)
         
-        return f"✅ **Site Deleted Successfully**\n\nThe site {fqdn} has been permanently deleted."
+        return (
+            "✅ **Site Deleted Successfully**\n\n"
+            f"The site {fqdn} has been permanently deleted."
+        )
         
     except SiteBayError as e:
         return f"Error deleting site: {str(e)}"

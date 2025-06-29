@@ -69,6 +69,9 @@ async def sitebay_list_sites(ctx: Context, team_id: Optional[str] = None) -> str
     except SiteBayError as e:
         await ctx.error(f"SiteBay API error: {str(e)}")
         return f"❌ SiteBay Error: {str(e)}"
+    except ValueError as e:
+        await ctx.error(f"Validation error listing sites: {str(e)}")
+        return f"❌ Validation Error: {str(e)}"
     except Exception as e:
         await ctx.error(f"Unexpected error listing sites: {str(e)}")
         return f"❌ Unexpected error: {str(e)}"
