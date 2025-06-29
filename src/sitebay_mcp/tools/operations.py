@@ -118,8 +118,9 @@ async def sitebay_site_get_events(
             
             if event.get('metadata'):
                 metadata = event.get('metadata')
-                for key, value in metadata.items():
-                    result += f"  - {key.title()}: {value}\n"
+                if isinstance(metadata, dict):
+                    for key, value in metadata.items():
+                        result += f"  - {key.title()}: {value}\n"
             
             result += "\n"
         
