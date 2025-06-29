@@ -23,7 +23,7 @@ async def get_site_config_resource(ctx: Context, site_fqdn: str) -> str:
         JSON formatted site configuration
     """
     try:
-        ctx.logger.info(f"Fetching configuration resource for: {site_fqdn}")
+        await ctx.info(f"Fetching configuration resource for: {site_fqdn}")
         
         from .server import initialize_client
         client = await initialize_client()
@@ -60,7 +60,7 @@ async def get_site_config_resource(ctx: Context, site_fqdn: str) -> str:
         return json.dumps(config, indent=2)
         
     except SiteBayError as e:
-        ctx.logger.error(f"Error fetching config for {site_fqdn}: {str(e)}")
+        await ctx.error(f"Error fetching config for {site_fqdn}: {str(e)}")
         return f"Error: {str(e)}"
 
 
@@ -77,7 +77,7 @@ async def get_site_events_resource(ctx: Context, site_fqdn: str, limit: int = 50
         JSON formatted site events
     """
     try:
-        ctx.logger.info(f"Fetching events resource for: {site_fqdn}")
+        await ctx.info(f"Fetching events resource for: {site_fqdn}")
         
         from .server import initialize_client
         client = await initialize_client()
@@ -106,7 +106,7 @@ async def get_site_events_resource(ctx: Context, site_fqdn: str, limit: int = 50
         return json.dumps(formatted_events, indent=2)
         
     except SiteBayError as e:
-        ctx.logger.error(f"Error fetching events for {site_fqdn}: {str(e)}")
+        await ctx.error(f"Error fetching events for {site_fqdn}: {str(e)}")
         return f"Error: {str(e)}"
 
 
@@ -121,7 +121,7 @@ async def get_account_summary_resource(ctx: Context) -> str:
         JSON formatted account summary
     """
     try:
-        ctx.logger.info("Fetching account summary resource")
+        await ctx.info("Fetching account summary resource")
         
         from .server import initialize_client
         client = await initialize_client()
@@ -167,5 +167,5 @@ async def get_account_summary_resource(ctx: Context) -> str:
         return json.dumps(summary, indent=2)
         
     except SiteBayError as e:
-        ctx.logger.error(f"Error fetching account summary: {str(e)}")
+        await ctx.error(f"Error fetching account summary: {str(e)}")
         return f"Error: {str(e)}"

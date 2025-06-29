@@ -18,7 +18,7 @@ from . import resources
 
 
 # Create the MCP server instance
-mcp = FastMCP("SiteBay WordPress Hosting")
+mcp: FastMCP = FastMCP("SiteBay WordPress Hosting")
 
 
 # Global client instance (will be initialized on startup)
@@ -86,19 +86,19 @@ async def sitebay_get_site(ctx: Context, fqdn: str) -> str:
         Detailed site information including status, versions, URLs, and configuration
     """
     try:
-        ctx.logger.info(f"Fetching details for site: {fqdn}")
+        await ctx.info(f"Fetching details for site: {fqdn}")
         
         client = await initialize_client()
         result = await sites.sitebay_get_site(client, fqdn)
         
-        ctx.logger.info(f"Successfully retrieved details for {fqdn}")
+        await ctx.info(f"Successfully retrieved details for {fqdn}")
         return result
         
     except SiteBayError as e:
-        ctx.logger.error(f"SiteBay API error for {fqdn}: {str(e)}")
+        await ctx.error(f"SiteBay API error for {fqdn}: {str(e)}")
         return f"❌ SiteBay Error: {str(e)}"
     except Exception as e:
-        ctx.logger.error(f"Unexpected error getting site {fqdn}: {str(e)}")
+        await ctx.error(f"Unexpected error getting site {fqdn}: {str(e)}")
         return f"❌ Unexpected error: {str(e)}"
 
 
@@ -131,37 +131,32 @@ async def sitebay_create_site(
         Success message with new site details and access information
     """
     try:
-        ctx.logger.info(f"Starting site creation for: {fqdn}")
+        await ctx.info(f"Starting site creation for: {fqdn}")
         
         # Progress reporting
-        progress = ctx.create_progress_token("site-creation")
-        await ctx.report_progress(progress, "Initializing site creation...", 0.1)
         
         client = await initialize_client()
         
-        await ctx.report_progress(progress, "Validating site configuration...", 0.2)
         
         # Basic validation
         if not fqdn or '.' not in fqdn:
             raise ValueError("Invalid domain name provided")
         
-        await ctx.report_progress(progress, "Submitting site creation request to SiteBay...", 0.4)
         
         result = await sites.sitebay_create_site(
             client, fqdn, wp_title, wp_username, wp_password, wp_email,
             region_name, template_id, team_id
         )
         
-        await ctx.report_progress(progress, "Site creation submitted successfully!", 1.0)
         
-        ctx.logger.info(f"Successfully created site: {fqdn}")
+        await ctx.info(f"Successfully created site: {fqdn}")
         return result
         
     except ValueError as e:
-        ctx.logger.error(f"Validation error creating site {fqdn}: {str(e)}")
+        await ctx.error(f"Validation error creating site {fqdn}: {str(e)}")
         return f"❌ Validation Error: {str(e)}"
     except ValidationError as e:
-        ctx.logger.error(f"SiteBay validation error creating site {fqdn}: {str(e)}")
+        await ctx.error(f"SiteBay validation error creating site {fqdn}: {str(e)}")
         
         # Provide detailed feedback for the agent with field-specific errors
         error_msg = f"❌ Validation Error - Please check your input:\n{str(e)}\n"
@@ -174,10 +169,10 @@ async def sitebay_create_site(
         error_msg += "\nPlease adjust your parameters and try again."
         return error_msg
     except SiteBayError as e:
-        ctx.logger.error(f"SiteBay API error creating site {fqdn}: {str(e)}")
+        await ctx.error(f"SiteBay API error creating site {fqdn}: {str(e)}")
         return f"❌ SiteBay Error: {str(e)}"
     except Exception as e:
-        ctx.logger.error(f"Unexpected error creating site {fqdn}: {str(e)}")
+        await ctx.error(f"Unexpected error creating site {fqdn}: {str(e)}")
         return f"❌ Unexpected error: {str(e)}"
 
 
@@ -399,7 +394,7 @@ async def sitebay_list_teams(ctx: Context) -> str:
         Formatted list of teams with their details and member information
     """
     try:
-        ctx.logger.info("Fetching teams from SiteBay")
+        await ctx.info("Fetching teams from SiteBay")
         
         client = await initialize_client()
         teams = await client.list_teams()
@@ -420,14 +415,14 @@ async def sitebay_list_teams(ctx: Context) -> str:
             
             result += "\n"
         
-        ctx.logger.info("Successfully retrieved teams list")
+        await ctx.info("Successfully retrieved teams list")
         return result
         
     except SiteBayError as e:
-        ctx.logger.error(f"SiteBay API error: {str(e)}")
+        await ctx.error(f"SiteBay API error: {str(e)}")
         return f"❌ SiteBay Error: {str(e)}"
     except Exception as e:
-        ctx.logger.error(f"Unexpected error listing teams: {str(e)}")
+        await ctx.error(f"Unexpected error listing teams: {str(e)}")
         return f"❌ Unexpected error: {str(e)}"
 
 
@@ -438,7 +433,7 @@ async def sitebay_wordpress_proxy(
     site_fqdn: str,
     endpoint: str,
     method: str = "GET",
-    data: dict = None
+    data: Optional[dict] = None
 ) -> str:
     """
     Proxy requests to a WordPress site's REST API.
@@ -453,7 +448,7 @@ async def sitebay_wordpress_proxy(
         WordPress API response
     """
     try:
-        ctx.logger.info(f"WordPress proxy request to {site_fqdn}{endpoint}")
+        await ctx.info(f"WordPress proxy request to {site_fqdn}{endpoint}")
         
         client = await initialize_client()
         proxy_data = {
@@ -468,10 +463,10 @@ async def sitebay_wordpress_proxy(
         return f"✅ WordPress API Response:\n```json\n{result}\n```"
         
     except SiteBayError as e:
-        ctx.logger.error(f"WordPress proxy error: {str(e)}")
+        await ctx.error(f"WordPress proxy error: {str(e)}")
         return f"❌ WordPress Proxy Error: {str(e)}"
     except Exception as e:
-        ctx.logger.error(f"Unexpected proxy error: {str(e)}")
+        await ctx.error(f"Unexpected proxy error: {str(e)}")
         return f"❌ Unexpected error: {str(e)}"
 
 
@@ -482,7 +477,7 @@ async def sitebay_shopify_proxy(
     endpoint: str,
     access_token: str,
     method: str = "GET",
-    data: dict = None
+    data: Optional[dict] = None
 ) -> str:
     """
     Proxy requests to a Shopify Admin API.
@@ -498,7 +493,7 @@ async def sitebay_shopify_proxy(
         Shopify API response
     """
     try:
-        ctx.logger.info(f"Shopify proxy request to {shop_domain}{endpoint}")
+        await ctx.info(f"Shopify proxy request to {shop_domain}{endpoint}")
         
         client = await initialize_client()
         proxy_data = {
@@ -514,10 +509,10 @@ async def sitebay_shopify_proxy(
         return f"✅ Shopify API Response:\n```json\n{result}\n```"
         
     except SiteBayError as e:
-        ctx.logger.error(f"Shopify proxy error: {str(e)}")
+        await ctx.error(f"Shopify proxy error: {str(e)}")
         return f"❌ Shopify Proxy Error: {str(e)}"
     except Exception as e:
-        ctx.logger.error(f"Unexpected proxy error: {str(e)}")
+        await ctx.error(f"Unexpected proxy error: {str(e)}")
         return f"❌ Unexpected error: {str(e)}"
 
 
@@ -540,7 +535,7 @@ async def sitebay_posthog_proxy(
         PostHog API response
     """
     try:
-        ctx.logger.info(f"PostHog proxy request to {endpoint}")
+        await ctx.info(f"PostHog proxy request to {endpoint}")
         
         client = await initialize_client()
         proxy_data = {
@@ -554,10 +549,10 @@ async def sitebay_posthog_proxy(
         return f"✅ PostHog API Response:\n```json\n{result}\n```"
         
     except SiteBayError as e:
-        ctx.logger.error(f"PostHog proxy error: {str(e)}")
+        await ctx.error(f"PostHog proxy error: {str(e)}")
         return f"❌ PostHog Proxy Error: {str(e)}"
     except Exception as e:
-        ctx.logger.error(f"Unexpected proxy error: {str(e)}")
+        await ctx.error(f"Unexpected proxy error: {str(e)}")
         return f"❌ Unexpected error: {str(e)}"
 
 
@@ -579,10 +574,8 @@ async def sitebay_staging_create(
         Staging site creation confirmation
     """
     try:
-        ctx.logger.info(f"Creating staging site for {fqdn}")
+        await ctx.info(f"Creating staging site for {fqdn}")
         
-        progress = ctx.create_progress_token("staging-creation")
-        await ctx.report_progress(progress, "Creating staging environment...", 0.3)
         
         client = await initialize_client()
         staging_data = {}
@@ -591,16 +584,15 @@ async def sitebay_staging_create(
             
         result = await client.create_staging_site(fqdn, staging_data)
         
-        await ctx.report_progress(progress, "Staging site created successfully!", 1.0)
         
-        ctx.logger.info(f"Successfully created staging site for {fqdn}")
+        await ctx.info(f"Successfully created staging site for {fqdn}")
         return f"✅ **Staging Site Created**\n\nStaging environment for {fqdn} is now available for testing changes safely."
         
     except SiteBayError as e:
-        ctx.logger.error(f"Error creating staging site: {str(e)}")
+        await ctx.error(f"Error creating staging site: {str(e)}")
         return f"❌ Staging Creation Error: {str(e)}"
     except Exception as e:
-        ctx.logger.error(f"Unexpected staging error: {str(e)}")
+        await ctx.error(f"Unexpected staging error: {str(e)}")
         return f"❌ Unexpected error: {str(e)}"
 
 
@@ -616,19 +608,19 @@ async def sitebay_staging_delete(ctx: Context, fqdn: str) -> str:
         Staging deletion confirmation
     """
     try:
-        ctx.logger.info(f"Deleting staging site for {fqdn}")
+        await ctx.info(f"Deleting staging site for {fqdn}")
         
         client = await initialize_client()
         await client.delete_staging_site(fqdn)
         
-        ctx.logger.info(f"Successfully deleted staging site for {fqdn}")
+        await ctx.info(f"Successfully deleted staging site for {fqdn}")
         return f"✅ **Staging Site Deleted**\n\nThe staging environment for {fqdn} has been removed."
         
     except SiteBayError as e:
-        ctx.logger.error(f"Error deleting staging site: {str(e)}")
+        await ctx.error(f"Error deleting staging site: {str(e)}")
         return f"❌ Staging Deletion Error: {str(e)}"
     except Exception as e:
-        ctx.logger.error(f"Unexpected staging error: {str(e)}")
+        await ctx.error(f"Unexpected staging error: {str(e)}")
         return f"❌ Unexpected error: {str(e)}"
 
 
@@ -644,24 +636,21 @@ async def sitebay_staging_commit(ctx: Context, fqdn: str) -> str:
         Staging commit confirmation
     """
     try:
-        ctx.logger.info(f"Committing staging changes for {fqdn}")
+        await ctx.info(f"Committing staging changes for {fqdn}")
         
-        progress = ctx.create_progress_token("staging-commit")
-        await ctx.report_progress(progress, "Syncing staging to live...", 0.5)
         
         client = await initialize_client()
         result = await client.commit_staging_site(fqdn)
         
-        await ctx.report_progress(progress, "Staging committed to live successfully!", 1.0)
         
-        ctx.logger.info(f"Successfully committed staging for {fqdn}")
+        await ctx.info(f"Successfully committed staging for {fqdn}")
         return f"✅ **Staging Committed to Live**\n\nChanges from staging have been synchronized to the live site {fqdn}."
         
     except SiteBayError as e:
-        ctx.logger.error(f"Error committing staging: {str(e)}")
+        await ctx.error(f"Error committing staging: {str(e)}")
         return f"❌ Staging Commit Error: {str(e)}"
     except Exception as e:
-        ctx.logger.error(f"Unexpected staging error: {str(e)}")
+        await ctx.error(f"Unexpected staging error: {str(e)}")
         return f"❌ Unexpected error: {str(e)}"
 
 
@@ -683,7 +672,7 @@ async def sitebay_backup_list_commits(
         List of available backup commits
     """
     try:
-        ctx.logger.info(f"Fetching backup commits for {fqdn}")
+        await ctx.info(f"Fetching backup commits for {fqdn}")
         
         client = await initialize_client()
         commits = await client.get_backup_commits(fqdn, number_to_fetch)
@@ -701,14 +690,14 @@ async def sitebay_backup_list_commits(
             result += f"  - Status: {'Completed' if commit.get('finished_at') else 'In Progress'}\n"
             result += "\n"
         
-        ctx.logger.info(f"Successfully retrieved backup commits for {fqdn}")
+        await ctx.info(f"Successfully retrieved backup commits for {fqdn}")
         return result
         
     except SiteBayError as e:
-        ctx.logger.error(f"Error fetching backup commits: {str(e)}")
+        await ctx.error(f"Error fetching backup commits: {str(e)}")
         return f"❌ Backup Error: {str(e)}"
     except Exception as e:
-        ctx.logger.error(f"Unexpected backup error: {str(e)}")
+        await ctx.error(f"Unexpected backup error: {str(e)}")
         return f"❌ Unexpected error: {str(e)}"
 
 
@@ -731,10 +720,8 @@ async def sitebay_backup_restore(
         Restore operation confirmation
     """
     try:
-        ctx.logger.info(f"Starting point-in-time restore for {fqdn}")
+        await ctx.info(f"Starting point-in-time restore for {fqdn}")
         
-        progress = ctx.create_progress_token("backup-restore")
-        await ctx.report_progress(progress, "Initializing restore operation...", 0.1)
         
         client = await initialize_client()
         restore_data = {
@@ -742,20 +729,18 @@ async def sitebay_backup_restore(
             "restore_type": restore_type
         }
         
-        await ctx.report_progress(progress, "Submitting restore request...", 0.3)
         
         result = await client.create_restore(fqdn, restore_data)
         
-        await ctx.report_progress(progress, "Restore operation initiated!", 1.0)
         
-        ctx.logger.info(f"Successfully initiated restore for {fqdn}")
+        await ctx.info(f"Successfully initiated restore for {fqdn}")
         return f"✅ **Point-in-Time Restore Initiated**\n\nRestore operation for {fqdn} has been started. The site will be restored to the selected backup point."
         
     except SiteBayError as e:
-        ctx.logger.error(f"Error starting restore: {str(e)}")
+        await ctx.error(f"Error starting restore: {str(e)}")
         return f"❌ Restore Error: {str(e)}"
     except Exception as e:
-        ctx.logger.error(f"Unexpected restore error: {str(e)}")
+        await ctx.error(f"Unexpected restore error: {str(e)}")
         return f"❌ Unexpected error: {str(e)}"
 
 
@@ -769,7 +754,7 @@ async def sitebay_account_affiliates(ctx: Context) -> str:
         List of users who signed up using your affiliate links
     """
     try:
-        ctx.logger.info("Fetching affiliate referrals")
+        await ctx.info("Fetching affiliate referrals")
         
         client = await initialize_client()
         affiliates = await client.get_affiliate_referrals()
@@ -785,14 +770,14 @@ async def sitebay_account_affiliates(ctx: Context) -> str:
             result += f"  - Status: {affiliate.get('status', 'Unknown')}\n"
             result += "\n"
         
-        ctx.logger.info("Successfully retrieved affiliate referrals")
+        await ctx.info("Successfully retrieved affiliate referrals")
         return result
         
     except SiteBayError as e:
-        ctx.logger.error(f"Error fetching affiliates: {str(e)}")
+        await ctx.error(f"Error fetching affiliates: {str(e)}")
         return f"❌ Affiliate Error: {str(e)}"
     except Exception as e:
-        ctx.logger.error(f"Unexpected affiliate error: {str(e)}")
+        await ctx.error(f"Unexpected affiliate error: {str(e)}")
         return f"❌ Unexpected error: {str(e)}"
 
 
@@ -815,7 +800,7 @@ async def sitebay_account_create_checkout(
         Stripe checkout URL
     """
     try:
-        ctx.logger.info(f"Creating checkout session for {plan_name} plan")
+        await ctx.info(f"Creating checkout session for {plan_name} plan")
         
         client = await initialize_client()
         checkout_data = {
@@ -827,14 +812,14 @@ async def sitebay_account_create_checkout(
             
         result = await client.create_checkout_session(checkout_data)
         
-        ctx.logger.info("Successfully created checkout session")
+        await ctx.info("Successfully created checkout session")
         return f"✅ **Checkout Session Created**\n\nPlan: {plan_name} ({interval}ly)\nCheckout URL: {result.get('url', 'URL not provided')}"
         
     except SiteBayError as e:
-        ctx.logger.error(f"Error creating checkout: {str(e)}")
+        await ctx.error(f"Error creating checkout: {str(e)}")
         return f"❌ Checkout Error: {str(e)}"
     except Exception as e:
-        ctx.logger.error(f"Unexpected checkout error: {str(e)}")
+        await ctx.error(f"Unexpected checkout error: {str(e)}")
         return f"❌ Unexpected error: {str(e)}"
 
 
