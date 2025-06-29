@@ -132,7 +132,7 @@ async def get_account_summary_resource(ctx: Context) -> str:
         regions = await client.list_regions()
         templates = await client.list_templates()
         
-        summary = {
+        summary: dict[str, Any] = {
             "account_overview": {
                 "total_sites": len(sites),
                 "total_teams": len(teams),
