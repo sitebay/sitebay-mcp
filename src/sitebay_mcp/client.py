@@ -113,7 +113,7 @@ class SiteBayClient:
         Returns:
             Dictionary mapping field names to error messages
         """
-        field_errors = {}
+        field_errors: Dict[str, str] = {}
         
         if not error_data:
             return field_errors
@@ -233,11 +233,21 @@ class SiteBayClient:
         return await self._request("DELETE", endpoint, params=params)
     
     # Site Management Methods
-    async def list_sites(self, team_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    async def list_sites(self, team_id: Optional[str] = None) -> Union[List[Dict[str, Any]], str]:
         """List all sites for the user"""
         params = {"team_id": team_id} if team_id else None
         response = await self.get("/site", params=params)
-        return response.get("results", [])
+        
+        # Handle case where API returns error as string
+        if isinstance(response, str):
+            return response
+        
+        # Handle normal dict response
+        if isinstance(response, dict):
+            return response.get("results", [])
+        
+        # Handle unexpected response format
+        return f"Unexpected response format: {type(response).__name__}"
     
     async def get_site(self, fqdn: str) -> Dict[str, Any]:
         """Get details for a specific site"""
