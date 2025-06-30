@@ -27,7 +27,8 @@ class SiteBayClient:
         self._client = httpx.AsyncClient(
             base_url=self.BASE_URL,
             timeout=timeout,
-            headers=self.auth.get_headers()
+            headers=self.auth.get_headers(),
+            follow_redirects=True
         )
     
     async def __aenter__(self):
