@@ -6,7 +6,7 @@ Main server implementation that provides MCP tools for SiteBay WordPress hosting
 
 import asyncio
 import sys
-from typing import Optional
+from typing import Any, Optional
 
 from fastmcp import FastMCP
 from fastmcp.server import Context
@@ -454,7 +454,7 @@ async def sitebay_wordpress_proxy(
         await ctx.info(f"WordPress proxy request to {site_fqdn}{endpoint}")
         
         client = await initialize_client()
-        proxy_data = {
+        proxy_data: dict[str, Any] = {
             "site_fqdn": site_fqdn,
             "endpoint": endpoint,
             "method": method
@@ -499,7 +499,7 @@ async def sitebay_shopify_proxy(
         await ctx.info(f"Shopify proxy request to {shop_domain}{endpoint}")
         
         client = await initialize_client()
-        proxy_data = {
+        proxy_data: dict[str, Any] = {
             "shop_domain": shop_domain,
             "endpoint": endpoint,
             "access_token": access_token,
@@ -541,7 +541,7 @@ async def sitebay_posthog_proxy(
         await ctx.info(f"PostHog proxy request to {endpoint}")
         
         client = await initialize_client()
-        proxy_data = {
+        proxy_data: dict[str, Any] = {
             "endpoint": endpoint,
             "data": data
         }

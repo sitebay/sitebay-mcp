@@ -103,7 +103,7 @@ class SiteBayClient:
         
         return f"Validation Error: {str(error_data)}"
     
-    def _extract_field_errors(self, error_data: dict) -> dict:
+    def _extract_field_errors(self, error_data: dict) -> dict[str, str]:
         """
         Extract field-specific errors for programmatic access
         
@@ -113,7 +113,7 @@ class SiteBayClient:
         Returns:
             Dictionary mapping field names to error messages
         """
-        field_errors: Dict[str, str] = {}
+        field_errors: dict[str, str] = {}
         
         if not error_data:
             return field_errors
