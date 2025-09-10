@@ -159,29 +159,6 @@ async def sitebay_site_external_path_create(
     return "External path tools are no longer supported."
 
 
-async def sitebay_site_external_path_update(
-    client: SiteBayClient,
-    fqdn: str,
-    path_id: str,
-    path: Optional[str] = None,
-    target_url: Optional[str] = None,
-    description: Optional[str] = None
-) -> str:
-    """
-    Update an external path configuration.
-    
-    Args:
-        fqdn: The fully qualified domain name of the site
-        path_id: The ID of the external path to update
-        path: New path value (optional)
-        target_url: New target URL (optional)
-        description: New description (optional)
-    
-    Returns:
-        Update confirmation message
-    """
-    return "External path tools are no longer supported."
-
 
 async def sitebay_site_external_path_delete(
     client: SiteBayClient,

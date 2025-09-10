@@ -30,30 +30,18 @@ async def get_site_config_resource(ctx: Context, site_fqdn: str) -> str:
         
         site = await client.get_site(site_fqdn)
         
-        # Format as readable configuration
+        # Format as readable configuration (schema-aligned fields)
         config = {
             "site_info": {
                 "domain": site.get("fqdn"),
-                "title": site.get("wordpress_blog_name") or site.get("wp_title"),
-                "status": site.get("status"),
-                "region": site.get("region_name"),
+                "active": site.get("active"),
+                "team_id": site.get("team_id"),
                 "created": site.get("created_at"),
-                "updated": site.get("updated_at")
-            },
-            "technical_specs": {
-                "php_version": site.get("php_version"),
-                "mysql_version": site.get("mysql_version"),
-                "wordpress_version": site.get("wp_version"),
-                "git_enabled": site.get("git_enabled", False)
-            },
-            "urls": {
-                "site_url": site.get("site_url"),
-                "admin_url": site.get("admin_url")
             },
             "features": {
-                "staging_available": bool(site.get("staging_site")),
-                "git_integration": site.get("git_enabled", False),
-                "backup_enabled": True  # SiteBay always has backups
+                "http_auth_enabled": site.get("http_auth_enabled", False),
+                "is_free": site.get("is_free", False),
+                "git_url": site.get("git_url"),
             }
         }
         
@@ -93,29 +81,32 @@ async def get_account_summary_resource(ctx: Context) -> str:
             "account_overview": {
                 "total_sites": len(sites),
                 "total_teams": len(teams),
-                "available_ready_made_sites": len(ready_made_sites)
+                "available_ready_made_sites": len(ready_made_sites),
+                # Filled below
+                "active_sites": 0,
+                "inactive_sites": 0,
             },
-            "sites_by_status": {},
-            "sites_by_region": {},
             "recent_sites": []
         }
         
         # Analyze sites
+        active_count = 0
+        inactive_count = 0
         for site in sites:
-            status = site.get("status", "unknown")
-            summary["sites_by_status"][status] = summary["sites_by_status"].get(status, 0) + 1
-            
-            region = site.get("region_name", "unknown")
-            summary["sites_by_region"][region] = summary["sites_by_region"].get(region, 0) + 1
+            if bool(site.get("active", False)):
+                active_count += 1
+            else:
+                inactive_count += 1
+        summary["account_overview"]["active_sites"] = active_count
+        summary["account_overview"]["inactive_sites"] = inactive_count
         
         # Get 5 most recent sites
         sorted_sites = sorted(sites, key=lambda x: x.get("created_at", ""), reverse=True)
         summary["recent_sites"] = [
             {
                 "domain": site.get("fqdn"),
-                "status": site.get("status"),
+                "active": site.get("active"),
                 "created": site.get("created_at"),
-                "region": site.get("region_name")
             }
             for site in sorted_sites[:5]
         ]

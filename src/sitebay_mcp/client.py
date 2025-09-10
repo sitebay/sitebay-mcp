@@ -302,7 +302,7 @@ class SiteBayClient:
     # Staging methods removed (no longer supported)
     
     # Backup/Restore Methods
-    async def get_backup_commits(self, fqdn: str, number_to_fetch: int = 10) -> List[Dict[str, Any]]:
+    async def get_backup_commits(self, fqdn: str, number_to_fetch: int = 1) -> List[Dict[str, Any]]:
         """Get backup commits for a site"""
         params = {"number_to_fetch": number_to_fetch}
         return await self.get(f"/site/{fqdn}/pit_restore/commits", params=params)

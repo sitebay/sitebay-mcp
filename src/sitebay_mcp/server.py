@@ -361,13 +361,10 @@ async def sitebay_list_teams(ctx: Context) -> str:
         for team in teams:
             result += f"• **{team.get('name', 'Unknown')}**\n"
             result += f"  - ID: {team.get('id', 'Unknown')}\n"
-            result += f"  - Role: {team.get('role', 'Unknown')}\n"
-            result += f"  - Created: {team.get('created_at', 'Unknown')}\n"
-            
-            if team.get('description'):
-                result += f"  - Description: {team.get('description')}\n"
-            
-            result += "\n"
+            result += f"  - Plan: {team.get('plan_type_name', 'Unknown')}\n"
+            result += f"  - Active: {team.get('is_active', 'Unknown')}\n"
+            result += f"  - Default: {team.get('is_default', 'Unknown')}\n"
+            result += f"  - Created: {team.get('created_at', 'Unknown')}\n\n"
         
         await ctx.info("Successfully retrieved teams list")
         return result
@@ -385,8 +382,8 @@ async def sitebay_list_teams(ctx: Context) -> str:
 async def sitebay_wordpress_proxy(
     ctx: Context,
     fqdn: str,
-    path: Optional[str] = None,
-    query_params_json: Optional[str] = None,
+    path: str = "/wp-json/wp/v2/",
+    query_params_json: str = "",
     method: str = "get",
 ) -> str:
     """
@@ -405,10 +402,8 @@ async def sitebay_wordpress_proxy(
         await ctx.info(f"WordPress proxy request to {fqdn}{path or ''}")
         
         client = await initialize_client()
-        proxy_data: dict[str, Any] = {"fqdn": fqdn, "method": method}
-        if path is not None:
-            proxy_data["path"] = path
-        if query_params_json is not None:
+        proxy_data: dict[str, Any] = {"fqdn": fqdn, "method": method, "path": path}
+        if query_params_json:
             proxy_data["query_params_json"] = query_params_json
             
         result = await client.wordpress_proxy(proxy_data)
@@ -426,8 +421,8 @@ async def sitebay_wordpress_proxy(
 async def sitebay_shopify_proxy(
     ctx: Context,
     shop_name: str,
-    path: Optional[str] = None,
-    query_params_json: Optional[str] = None,
+    path: str = "/admin/api/2024-04",
+    query_params_json: str = "",
     method: str = "get",
 ) -> str:
     """
@@ -446,10 +441,8 @@ async def sitebay_shopify_proxy(
         await ctx.info(f"Shopify proxy request to {shop_name}{path or ''}")
         
         client = await initialize_client()
-        proxy_data: dict[str, Any] = {"shop_name": shop_name, "method": method}
-        if path is not None:
-            proxy_data["path"] = path
-        if query_params_json is not None:
+        proxy_data: dict[str, Any] = {"shop_name": shop_name, "method": method, "path": path}
+        if query_params_json:
             proxy_data["query_params_json"] = query_params_json
             
         result = await client.shopify_proxy(proxy_data)
@@ -467,7 +460,7 @@ async def sitebay_shopify_proxy(
 async def sitebay_posthog_proxy(
     ctx: Context,
     path: str,
-    query_params_json: Optional[str] = None,
+    query_params_json: str = "",
     method: str = "get",
 ) -> str:
     """
@@ -486,7 +479,7 @@ async def sitebay_posthog_proxy(
         
         client = await initialize_client()
         proxy_data: dict[str, Any] = {"path": path, "method": method}
-        if query_params_json is not None:
+        if query_params_json:
             proxy_data["query_params_json"] = query_params_json
             
         result = await client.posthog_proxy(proxy_data)
@@ -508,14 +501,14 @@ async def sitebay_posthog_proxy(
 async def sitebay_backup_list_commits(
     ctx: Context,
     fqdn: str,
-    number_to_fetch: int = 10
+    number_to_fetch: int = 1
 ) -> str:
     """
     List available backup commits for point-in-time restore.
     
     Args:
         fqdn: The site domain
-        number_to_fetch: Number of backup entries to fetch (default: 10)
+        number_to_fetch: Number of backup entries to fetch (default: 1)
     
     Returns:
         List of available backup commits
@@ -634,10 +627,10 @@ async def sitebay_account_affiliates(ctx: Context) -> str:
         result = f"**Your Affiliate Referrals** ({len(affiliates)} referrals):\n\n"
         
         for affiliate in affiliates:
-            result += f"• **User**: {affiliate.get('email', 'Unknown')}\n"
+            result += f"• **Email**: {affiliate.get('email', 'Unknown')}\n"
+            result += f"  - Name: {affiliate.get('full_name', 'Unknown')}\n"
             result += f"  - Signed up: {affiliate.get('created_at', 'Unknown')}\n"
-            result += f"  - Status: {affiliate.get('status', 'Unknown')}\n"
-            result += "\n"
+            result += f"  - Active: {affiliate.get('is_active', 'Unknown')}\n\n"
         
         await ctx.info("Successfully retrieved affiliate referrals")
         return result

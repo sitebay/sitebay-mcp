@@ -7,15 +7,15 @@ A Model Context Protocol (MCP) server that provides Claude Code users with direc
 
 ### 🌐 Site Management
 - List all your hosted WordPress sites
-- Get detailed site information (status, region, PHP version, etc.)
+- Get detailed site information (active, HTTP auth, plan)
 - Create new WordPress sites using SiteBay's ready-made sites
-- Update site configurations (PHP version, admin credentials, etc.)
+- Update site settings (Cloudflare dev mode, domain, HTTP auth, Git URL)
 - Delete sites
 
 ### ⚡ Site Operations
 - Execute shell commands and WP-CLI commands on SiteBay servers
 - Edit files in wp-content directory on your hosted sites
-- View site events and deployment logs from SiteBay infrastructure  
+ 
  
 
 ### 🛠 Advanced Features
@@ -46,6 +46,7 @@ uvx sitebay-mcp
 # Or install for repeated use
 uv tool install sitebay-mcp
 sitebay-mcp
+```
 
 ## HTTP Transport (Recommended for hosted deployments)
 
@@ -77,9 +78,8 @@ Add a server URL entry instead of a command:
         "SITEBAY_API_TOKEN": "your_api_token_here"
       }
     }
-  }
 }
-```
+}
 ```
 
 ### Using pip

@@ -40,13 +40,10 @@ async def sitebay_list_sites(
         
         for site in sites:
             result += f"• **{site.get('fqdn', 'Unknown')}**\n"
-            result += f"  - Status: {site.get('status', 'Unknown')}\n"
-            result += f"  - Region: {site.get('region_name', 'Unknown')}\n"
-            result += f"  - WordPress Version: {site.get('wp_version', 'Unknown')}\n"
-            result += f"  - PHP Version: {site.get('php_version', 'Unknown')}\n"
+            result += f"  - Active: {site.get('active', 'Unknown')}\n"
+            result += f"  - HTTP Auth Enabled: {site.get('http_auth_enabled', 'Unknown')}\n"
+            result += f"  - Is Free: {site.get('is_free', 'Unknown')}\n"
             result += f"  - Created: {site.get('created_at', 'Unknown')}\n"
-            if site.get('staging_site'):
-                result += f"  - Has Staging Site: Yes\n"
             result += "\n"
         
         return result
@@ -74,20 +71,14 @@ async def sitebay_get_site(
         site = await client.get_site(fqdn)
         
         result = f"**Site Details for {fqdn}**\n\n"
-        result += f"• **Status**: {site.get('status', 'Unknown')}\n"
-        result += f"• **Region**: {site.get('region_name', 'Unknown')}\n"
-        result += f"• **WordPress Version**: {site.get('wp_version', 'Unknown')}\n"
-        result += f"• **PHP Version**: {site.get('php_version', 'Unknown')}\n"
-        result += f"• **MySQL Version**: {site.get('mysql_version', 'Unknown')}\n"
-        result += f"• **Site URL**: {site.get('site_url', 'Unknown')}\n"
-        result += f"• **Admin URL**: {site.get('admin_url', 'Unknown')}\n"
+        result += f"• **Active**: {site.get('active', 'Unknown')}\n"
+        result += f"• **HTTP Auth Enabled**: {site.get('http_auth_enabled', 'Unknown')}\n"
+        result += f"• **Is Free**: {site.get('is_free', 'Unknown')}\n"
+        result += f"• **Git URL**: {site.get('git_url', '—')}\n"
         result += f"• **Created**: {site.get('created_at', 'Unknown')}\n"
         result += f"• **Updated**: {site.get('updated_at', 'Unknown')}\n"
         
-        if site.get('staging_site'):
-            result += f"• **Staging Site**: Available\n"
-        else:
-            result += f"• **Staging Site**: Not created\n"
+
         
         if site.get('git_enabled'):
             result += f"• **Git Integration**: Enabled\n"
@@ -155,11 +146,8 @@ async def sitebay_create_site(
 
         result = f"✅ **Site Created Successfully!**\n\n"
         result += f"• **Domain**: {site.get('fqdn')}\n"
-        result += f"• **Status**: {site.get('status')}\n"
-        if site.get('region_name'):
-            result += f"• **Region**: {site.get('region_name')}\n"
-        result += f"• **Site URL**: {site.get('site_url')}\n"
-        result += f"• **Admin URL**: {site.get('admin_url')}\n"
+        result += f"• **Active**: {site.get('active', 'Unknown')}\n"
+        result += f"• **HTTP Auth Enabled**: {site.get('http_auth_enabled', 'Unknown')}\n"
         result += f"• **Admin Username**: {wordpress_username}\n"
         result += f"• **Admin Email**: {wordpress_email}\n"
         if git_url:
