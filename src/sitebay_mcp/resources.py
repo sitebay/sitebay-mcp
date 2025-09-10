@@ -64,50 +64,7 @@ async def get_site_config_resource(ctx: Context, site_fqdn: str) -> str:
         return f"Error: {str(e)}"
 
 
-async def get_site_events_resource(ctx: Context, site_fqdn: str, limit: int = 50) -> str:
-    """
-    Get site events/logs as a resource.
-    
-    Args:
-        ctx: FastMCP context
-        site_fqdn: Site domain name
-        limit: Maximum number of events to fetch
-    
-    Returns:
-        JSON formatted site events
-    """
-    try:
-        await ctx.info(f"Fetching events resource for: {site_fqdn}")
-        
-        from .server import initialize_client
-        client = await initialize_client()
-        
-        events = await client.get_site_events(site_fqdn)
-        
-        # Limit and format events
-        limited_events = events[:limit]
-        
-        formatted_events = {
-            "site": site_fqdn,
-            "total_events": len(events),
-            "showing": len(limited_events),
-            "events": [
-                {
-                    "timestamp": event.get("created_at"),
-                    "type": event.get("event_type"),
-                    "status": event.get("status"),
-                    "description": event.get("description"),
-                    "metadata": event.get("metadata", {})
-                }
-                for event in limited_events
-            ]
-        }
-        
-        return json.dumps(formatted_events, indent=2)
-        
-    except SiteBayError as e:
-        await ctx.error(f"Error fetching events for {site_fqdn}: {str(e)}")
-        return f"Error: {str(e)}"
+# Site events resource removed (not present in schema)
 
 
 async def get_account_summary_resource(ctx: Context) -> str:

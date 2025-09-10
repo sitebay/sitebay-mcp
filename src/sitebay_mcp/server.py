@@ -707,19 +707,7 @@ async def site_config_resource(ctx: Context, site_fqdn: str) -> str:
     return await resources.get_site_config_resource(ctx, site_fqdn)
 
 
-@mcp.resource("sitebay://site/{site_fqdn}/events")
-async def site_events_resource(ctx: Context, site_fqdn: str, limit: int = 50) -> str:
-    """
-    Get site events and logs as a readable resource.
-    
-    Args:
-        site_fqdn: The fully qualified domain name of the site
-        limit: Maximum number of events to return (default: 50)
-    
-    Returns:
-        JSON formatted site events and deployment logs
-    """
-    return await resources.get_site_events_resource(ctx, site_fqdn, limit)
+# Site events resource removed (not present in schema)
 
 
 @mcp.resource("sitebay://account/summary")

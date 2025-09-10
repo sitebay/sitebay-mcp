@@ -191,8 +191,6 @@ Claude: Check the disk usage on myblog.example.com with "df -h" on the SiteBay s
 
 ```
 Claude: Edit the style.css file in my active theme on myblog.example.com hosted on SiteBay
-
-Claude: Show me recent events and deployment logs for myblog.example.com from SiteBay
 ```
 
  
@@ -215,7 +213,7 @@ Claude: List all the ready-made sites available on SiteBay for new sites
 ### Site Operations
 - `sitebay_site_shell_command` - Execute shell/WP-CLI commands on SiteBay servers
 - `sitebay_site_edit_file` - Edit files in wp-content on SiteBay-hosted sites
-- `sitebay_site_get_events` - View site events and deployment logs from SiteBay
+ 
  
 
 ### Helper Tools
