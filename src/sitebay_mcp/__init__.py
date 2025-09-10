@@ -2,7 +2,7 @@
 SiteBay MCP Server
 
 Provides Model Context Protocol (MCP) integration for SiteBay WordPress hosting platform.
-Allows Claude Code users to manage WordPress sites, execute commands, handle staging,
+Allows Claude Code users to manage WordPress sites, execute commands,
 backups, and more through natural language interactions.
 """
 

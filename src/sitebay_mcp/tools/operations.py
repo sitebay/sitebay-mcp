@@ -10,7 +10,9 @@ from ..exceptions import SiteBayError
 async def sitebay_site_shell_command(
     client: SiteBayClient,
     fqdn: str,
-    command: str
+    command: str,
+    cwd: Optional[str] = None,
+    auto_track_dir: Optional[bool] = None,
 ) -> str:
     """
     Execute a shell command on a WordPress site (including WP-CLI commands).
@@ -23,7 +25,9 @@ async def sitebay_site_shell_command(
         Command output or error message
     """
     try:
-        result = await client.execute_shell_command(fqdn, command)
+        result = await client.execute_shell_command(
+            fqdn, cmd=command, cwd=cwd, auto_track_dir=auto_track_dir
+        )
         
         # Handle different response formats
         if isinstance(result, dict):
@@ -38,6 +42,8 @@ async def sitebay_site_shell_command(
         
         response = f"**Command executed on {fqdn}:**\n"
         response += f"```bash\n{command}\n```\n\n"
+        if cwd is not None:
+            response += f"Working dir: {cwd}\n\n"
         response += f"**Output:**\n```\n{output}\n```"
         
         return response
@@ -50,26 +56,52 @@ async def sitebay_site_edit_file(
     client: SiteBayClient,
     fqdn: str,
     file_path: str,
-    content: str
+    file_edit_using_search_replace_blocks: str,
 ) -> str:
     """
-    Edit a file in the site's wp-content directory.
+    Edit a file in the site's wp-content directory using diff-edit blocks.
     
     Args:
         fqdn: The fully qualified domain name of the site
-        file_path: Path to the file relative to wp-content (e.g., "themes/mytheme/style.css")
-        content: New content for the file
+        file_path: Path to the file relative to wp-content (e.g., "wp-content/themes/mytheme/style.css")
+        file_edit_using_search_replace_blocks: A single string containing blocks in the form:
+            <<<<<< SEARCH\nold text\n=======\nnew text\n>>>>>> REPLACE
     
     Returns:
         Success message or error
     """
     try:
-        result = await client.edit_file(fqdn, file_path, content)
+        # Normalize path (server also handles this, but we pre-normalize to help users)
+        normalized_path = file_path.replace(
+            "/bitnami/wordpress/wp-content", "wp-content"
+        )
+        
+        if not normalized_path.startswith("wp-content"):
+            return (
+                "❌ Invalid file_path: must start with 'wp-content/'. "
+                "Example: wp-content/themes/mytheme/style.css"
+            )
+        
+        text = file_edit_using_search_replace_blocks
+        if (
+            "<<<<<<< SEARCH" not in text
+            or "=======" not in text
+            or ">>>>>> REPLACE" not in text
+        ):
+            return (
+                "❌ Invalid diff-edit block format. Make sure blocks are in correct sequence, "
+                "and the markers are on separate lines:\n\n"
+                "<<<<<< SEARCH\n    example old\n=======\n    example new\n>>>>>> REPLACE\n"
+            )
+        
+        result = await client.edit_file(
+            fqdn, normalized_path, text
+        )
         
         response = f"✅ **File Updated Successfully**\n\n"
         response += f"• **Site**: {fqdn}\n"
         response += f"• **File**: wp-content/{file_path}\n"
-        response += f"• **Content Length**: {len(content)} characters\n"
+        response += f"• **Content Length**: {len(text)} characters\n"
         
         if isinstance(result, str) and result:
             response += f"\n**Server Response:**\n```\n{result}\n```"
@@ -86,47 +118,7 @@ async def sitebay_site_get_events(
     after_datetime: Optional[str] = None,
     limit: int = 20
 ) -> str:
-    """
-    Get recent events for a site (deployments, updates, restores, etc.).
-    
-    Args:
-        fqdn: The fully qualified domain name of the site
-        after_datetime: Optional datetime to filter events after (ISO format)
-        limit: Maximum number of events to return (default: 20)
-    
-    Returns:
-        Formatted list of site events
-    """
-    try:
-        events = await client.get_site_events(fqdn, after_datetime)
-        
-        if not events:
-            return f"No events found for {fqdn}."
-        
-        # Limit the results
-        events = events[:limit]
-        
-        result = f"**Recent Events for {fqdn}** (showing {len(events)} events):\n\n"
-        
-        for event in events:
-            result += f"• **{event.get('event_type', 'Unknown Event')}**\n"
-            result += f"  - Time: {event.get('created_at', 'Unknown')}\n"
-            result += f"  - Status: {event.get('status', 'Unknown')}\n"
-            
-            if event.get('description'):
-                result += f"  - Description: {event.get('description')}\n"
-            
-            if event.get('metadata'):
-                metadata = event.get('metadata') or {}
-                for key, value in metadata.items():
-                    result += f"  - {key.title()}: {value}\n"
-            
-            result += "\n"
-        
-        return result
-        
-    except SiteBayError as e:
-        return f"Error getting events for {fqdn}: {str(e)}"
+    return "Site events are not available via schema endpoints."
 
 
 async def sitebay_site_external_path_list(
@@ -142,26 +134,7 @@ async def sitebay_site_external_path_list(
     Returns:
         List of external path configurations
     """
-    try:
-        paths = await client.list_external_paths(fqdn)
-        
-        if not paths:
-            return f"No external paths configured for {fqdn}."
-        
-        result = f"**External Paths for {fqdn}**:\n\n"
-        
-        for path in paths:
-            result += f"• **Path**: {path.get('path', 'Unknown')}\n"
-            result += f"  - Target URL: {path.get('target_url', 'Unknown')}\n"
-            result += f"  - Status: {path.get('status', 'Unknown')}\n"
-            result += f"  - Created: {path.get('created_at', 'Unknown')}\n"
-            result += f"  - ID: {path.get('id', 'Unknown')}\n"
-            result += "\n"
-        
-        return result
-        
-    except SiteBayError as e:
-        return f"Error listing external paths for {fqdn}: {str(e)}"
+    return "External path tools are no longer supported."
 
 
 async def sitebay_site_external_path_create(
@@ -183,33 +156,7 @@ async def sitebay_site_external_path_create(
     Returns:
         Success message with path details
     """
-    try:
-        path_data = {
-            "path": path,
-            "target_url": target_url,
-        }
-        
-        if description:
-            path_data["description"] = description
-        
-        external_path = await client.create_external_path(fqdn, path_data)
-        
-        result = f"✅ **External Path Created Successfully**\n\n"
-        result += f"• **Site**: {fqdn}\n"
-        result += f"• **Path**: {external_path.get('path')}\n"
-        result += f"• **Target URL**: {external_path.get('target_url')}\n"
-        result += f"• **Status**: {external_path.get('status')}\n"
-        result += f"• **ID**: {external_path.get('id')}\n"
-        
-        if description:
-            result += f"• **Description**: {description}\n"
-        
-        result += f"\n🔗 Your site path {fqdn}{path} now proxies to {target_url}"
-        
-        return result
-        
-    except SiteBayError as e:
-        return f"Error creating external path for {fqdn}: {str(e)}"
+    return "External path tools are no longer supported."
 
 
 async def sitebay_site_external_path_update(
@@ -233,32 +180,7 @@ async def sitebay_site_external_path_update(
     Returns:
         Update confirmation message
     """
-    try:
-        path_data = {}
-        
-        if path:
-            path_data["path"] = path
-        if target_url:
-            path_data["target_url"] = target_url
-        if description:
-            path_data["description"] = description
-        
-        if not path_data:
-            return "No updates specified. Please provide at least one field to update."
-        
-        external_path = await client.update_external_path(fqdn, path_id, path_data)
-        
-        result = f"✅ **External Path Updated Successfully**\n\n"
-        result += f"• **Site**: {fqdn}\n"
-        result += f"• **Path**: {external_path.get('path')}\n"
-        result += f"• **Target URL**: {external_path.get('target_url')}\n"
-        result += f"• **Status**: {external_path.get('status')}\n"
-        result += f"• **ID**: {external_path.get('id')}\n"
-        
-        return result
-        
-    except SiteBayError as e:
-        return f"Error updating external path for {fqdn}: {str(e)}"
+    return "External path tools are no longer supported."
 
 
 async def sitebay_site_external_path_delete(
@@ -276,10 +198,4 @@ async def sitebay_site_external_path_delete(
     Returns:
         Deletion confirmation message
     """
-    try:
-        await client.delete_external_path(fqdn, path_id)
-        
-        return f"✅ **External Path Deleted Successfully**\n\nExternal path {path_id} has been removed from {fqdn}."
-        
-    except SiteBayError as e:
-        return f"Error deleting external path for {fqdn}: {str(e)}"
+    return "External path tools are no longer supported."

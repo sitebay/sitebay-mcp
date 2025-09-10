@@ -5,8 +5,11 @@ Main server implementation that provides MCP tools for SiteBay WordPress hosting
 """
 
 import asyncio
+import os
 import sys
+import argparse
 from typing import Any, Optional
+from pydantic import UUID4
 
 from fastmcp import FastMCP
 from fastmcp.server import Context
@@ -33,9 +36,12 @@ async def initialize_client() -> SiteBayClient:
         try:
             auth = SiteBayAuth()
             sitebay_client = SiteBayClient(auth)
-            
-            # Test the connection by trying to list regions (public endpoint)
-            await sitebay_client.list_regions()
+            # Test the connection using a lightweight, public endpoint
+            try:
+                await sitebay_client.list_ready_made_sites()
+            except Exception:
+                # Non-fatal for initialization; auth/transport issues will surface later
+                pass
             
         except Exception as e:
             raise ConfigurationError(f"Failed to initialize SiteBay client: {str(e)}")
@@ -45,12 +51,12 @@ async def initialize_client() -> SiteBayClient:
 
 # Site Management Tools
 @mcp.tool
-async def sitebay_list_sites(ctx: Context, team_id: Optional[str] = None) -> str:
+async def sitebay_list_sites(ctx: Context, team_id: Optional[UUID4] = None) -> str:
     """
     List all WordPress sites for the authenticated user.
     
     Args:
-        team_id: Optional team ID to filter sites by team
+        team_id: Optional team ID (UUID4) to filter sites by team
     
     Returns:
         Formatted string with site details including domain, status, region, and versions
@@ -61,7 +67,8 @@ async def sitebay_list_sites(ctx: Context, team_id: Optional[str] = None) -> str
             await ctx.info(f"Filtering by team ID: {team_id}")
         
         client = await initialize_client()
-        result = await sites.sitebay_list_sites(client, team_id)
+        team_id_str = str(team_id) if team_id is not None else None
+        result = await sites.sitebay_list_sites(client, team_id_str)
         
         await ctx.info("Successfully retrieved site list")
         return result
@@ -108,27 +115,33 @@ async def sitebay_get_site(ctx: Context, fqdn: str) -> str:
 @mcp.tool
 async def sitebay_create_site(
     ctx: Context,
+    team_id: str,
     fqdn: str,
-    wp_title: str,
-    wp_username: str,
-    wp_password: str,
-    wp_email: str,
-    region_name: Optional[str] = None,
-    template_id: Optional[str] = None,
-    team_id: Optional[str] = None
+    wordpress_blog_name: str,
+    wordpress_first_name: str,
+    wordpress_last_name: str,
+    wordpress_email: str,
+    wordpress_username: str,
+    wordpress_password: str,
+    git_url: Optional[str] = None,
+    ready_made_site_name: Optional[str] = None,
+    is_free: Optional[bool] = None,
 ) -> str:
     """
-    Create a new WordPress site.
+    Create a new WordPress site (SiteLiveCreate schema).
     
     Args:
-        fqdn: The fully qualified domain name for the new site (e.g., "myblog.example.com")
-        wp_title: WordPress site title
-        wp_username: WordPress admin username
-        wp_password: WordPress admin password (should be strong)
-        wp_email: WordPress admin email address
-        region_name: Optional region name for hosting (uses default if not specified)
-        template_id: Optional template ID to use for site creation
-        team_id: Optional team ID to create site under
+        team_id: Team UUID that owns the site
+        fqdn: The fully qualified domain name for the new site (e.g., "www.example.org")
+        wordpress_blog_name: Blog/site title
+        wordpress_first_name: Admin first name
+        wordpress_last_name: Admin last name
+        wordpress_email: Admin email address
+        wordpress_username: Admin username
+        wordpress_password: Admin password (strong)
+        git_url: Optional Git repository URL
+        ready_made_site_name: Optional ready-made site name
+        is_free: Optional flag for free plan
     
     Returns:
         Success message with new site details and access information
@@ -136,21 +149,28 @@ async def sitebay_create_site(
     try:
         await ctx.info(f"Starting site creation for: {fqdn}")
         
-        # Progress reporting
-        
         client = await initialize_client()
-        
         
         # Basic validation
         if not fqdn or '.' not in fqdn:
             raise ValueError("Invalid domain name provided")
-        
+        if not team_id:
+            raise ValueError("team_id is required")
         
         result = await sites.sitebay_create_site(
-            client, fqdn, wp_title, wp_username, wp_password, wp_email,
-            region_name, template_id, team_id
+            client,
+            team_id,
+            fqdn,
+            wordpress_blog_name,
+            wordpress_first_name,
+            wordpress_last_name,
+            wordpress_email,
+            wordpress_username,
+            wordpress_password,
+            git_url,
+            ready_made_site_name,
+            is_free,
         )
-        
         
         await ctx.info(f"Successfully created site: {fqdn}")
         return result
@@ -160,15 +180,11 @@ async def sitebay_create_site(
         return f"❌ Validation Error: {str(e)}"
     except ValidationError as e:
         await ctx.error(f"SiteBay validation error creating site {fqdn}: {str(e)}")
-        
-        # Provide detailed feedback for the agent with field-specific errors
         error_msg = f"❌ Validation Error - Please check your input:\n{str(e)}\n"
-        
         if hasattr(e, 'field_errors') and e.field_errors:
             error_msg += "\nSpecific field errors:\n"
             for field, msg in e.field_errors.items():
                 error_msg += f"  • {field}: {msg}\n"
-        
         error_msg += "\nPlease adjust your parameters and try again."
         return error_msg
     except SiteBayError as e:
@@ -182,51 +198,64 @@ async def sitebay_create_site(
 @mcp.tool
 async def sitebay_update_site(
     fqdn: str,
-    wp_title: Optional[str] = None,
-    wp_username: Optional[str] = None,
-    wp_password: Optional[str] = None,
-    wp_email: Optional[str] = None,
-    php_version: Optional[str] = None
+    cf_dev_mode_enabled: Optional[bool] = None,
+    new_fqdn: Optional[str] = None,
+    git_url: Optional[str] = None,
+    http_auth_enabled: Optional[bool] = None,
+    team_id: Optional[str] = None,
+    is_free: Optional[bool] = None,
 ) -> str:
     """
-    Update an existing WordPress site configuration.
+    Update an existing SiteBay site configuration.
     
     Args:
-        fqdn: The fully qualified domain name of the site to update
-        wp_title: New WordPress site title
-        wp_username: New WordPress admin username
-        wp_password: New WordPress admin password
-        wp_email: New WordPress admin email
-        php_version: New PHP version (e.g., "8.1", "8.2", "8.3")
+        fqdn: Site domain to update
+        cf_dev_mode_enabled: Enable/disable Cloudflare dev mode
+        new_fqdn: Change the site domain
+        git_url: Set repository URL for deployments
+        http_auth_enabled: Enable/disable HTTP basic auth
+        team_id: Move site to a different team
+        is_free: Toggle free plan flag
     
     Returns:
         Confirmation message with updated settings
     """
     client = await initialize_client()
     return await sites.sitebay_update_site(
-        client, fqdn, wp_title, wp_username, wp_password, wp_email, php_version
+        client,
+        fqdn,
+        cf_dev_mode_enabled=cf_dev_mode_enabled,
+        new_fqdn=new_fqdn,
+        git_url=git_url,
+        http_auth_enabled=http_auth_enabled,
+        team_id=team_id,
+        is_free=is_free,
     )
 
 
 @mcp.tool
-async def sitebay_delete_site(fqdn: str, confirm: bool = False) -> str:
+async def sitebay_delete_site(fqdn: str) -> str:
     """
     Delete a WordPress site permanently. This action cannot be undone.
     
     Args:
         fqdn: The fully qualified domain name of the site to delete
-        confirm: Must be True to actually delete the site (safety check)
     
     Returns:
-        Confirmation message or deletion requirements if confirm=False
+        Confirmation message
     """
     client = await initialize_client()
-    return await sites.sitebay_delete_site(client, fqdn, confirm)
+    return await sites.sitebay_delete_site(client, fqdn)
 
 
 # Site Operations Tools
 @mcp.tool
-async def sitebay_site_shell_command(fqdn: str, command: str) -> str:
+async def sitebay_site_shell_command(
+    fqdn: str,
+    command: str,
+    cwd: Optional[str] = None,
+    auto_track_dir: Optional[bool] = None,
+) -> str:
     """
     Execute a shell command on a WordPress site. Supports WP-CLI commands, system commands, etc.
     
@@ -238,11 +267,17 @@ async def sitebay_site_shell_command(fqdn: str, command: str) -> str:
         Command output and execution details
     """
     client = await initialize_client()
-    return await operations.sitebay_site_shell_command(client, fqdn, command)
+    return await operations.sitebay_site_shell_command(
+        client, fqdn, command, cwd=cwd, auto_track_dir=auto_track_dir
+    )
 
 
 @mcp.tool
-async def sitebay_site_edit_file(fqdn: str, file_path: str, content: str) -> str:
+async def sitebay_site_edit_file(
+    fqdn: str,
+    file_path: str,
+    file_edit_using_search_replace_blocks: str,
+) -> str:
     """
     Edit a file in the site's wp-content directory.
     
@@ -255,137 +290,53 @@ async def sitebay_site_edit_file(fqdn: str, file_path: str, content: str) -> str
         Success confirmation with file details
     """
     client = await initialize_client()
-    return await operations.sitebay_site_edit_file(client, fqdn, file_path, content)
-
-
-@mcp.tool
-async def sitebay_site_get_events(
-    fqdn: str,
-    after_datetime: Optional[str] = None,
-    limit: int = 20
-) -> str:
-    """
-    Get recent events for a site (deployments, updates, restores, etc.).
-    
-    Args:
-        fqdn: The fully qualified domain name of the site
-        after_datetime: Optional ISO datetime to filter events after (e.g., "2024-01-01T00:00:00Z")
-        limit: Maximum number of events to return (default: 20)
-    
-    Returns:
-        Formatted list of recent site events with timestamps and details
-    """
-    client = await initialize_client()
-    return await operations.sitebay_site_get_events(client, fqdn, after_datetime, limit)
-
-
-@mcp.tool
-async def sitebay_site_external_path_list(fqdn: str) -> str:
-    """
-    List external path configurations for a site (URL proxying/routing).
-    
-    Args:
-        fqdn: The fully qualified domain name of the site
-    
-    Returns:
-        List of configured external paths with their target URLs and status
-    """
-    client = await initialize_client()
-    return await operations.sitebay_site_external_path_list(client, fqdn)
-
-
-@mcp.tool
-async def sitebay_site_external_path_create(
-    fqdn: str,
-    path: str,
-    target_url: str,
-    description: Optional[str] = None
-) -> str:
-    """
-    Create an external path configuration to proxy requests to external URLs.
-    
-    Args:
-        fqdn: The fully qualified domain name of the site
-        path: The path on your site (e.g., "/api", "/external")
-        target_url: The external URL to proxy requests to
-        description: Optional description for this path configuration
-    
-    Returns:
-        Success message with external path details
-    """
-    client = await initialize_client()
-    return await operations.sitebay_site_external_path_create(
-        client, fqdn, path, target_url, description
+    return await operations.sitebay_site_edit_file(
+        client, fqdn, file_path, file_edit_using_search_replace_blocks
     )
 
 
+# Site events tool removed (not present in schema)
+
+
+# External path tools removed (no longer supported)
+
+
 # Helper Tools
+
+
 @mcp.tool
-async def sitebay_list_regions() -> str:
+async def sitebay_list_ready_made_sites() -> str:
     """
-    List all available hosting regions for site deployment.
+    List available ready-made sites for quick launches.
     
     Returns:
-        List of available regions with their details
+        List of ready-made sites with descriptions
     """
     try:
         client = await initialize_client()
-        regions = await client.list_regions()
+        items = await client.list_ready_made_sites()
         
-        if not regions:
-            return "No regions available."
+        if not items:
+            return "No ready-made sites available."
         
-        result = f"**Available Hosting Regions** ({len(regions)} regions):\n\n"
+        result = f"**Available Ready-made Sites** ({len(items)}):\n\n"
         
-        for region in regions:
-            result += f"• **{region.get('name', 'Unknown')}**\n"
-            result += f"  - Location: {region.get('location', 'Unknown')}\n"
-            result += f"  - Status: {region.get('status', 'Unknown')}\n"
+        for item in items:
+            result += f"• **{item.get('name', 'Unknown')}**\n"
+            result += f"  - ID: {item.get('id', 'Unknown')}\n"
             
-            if region.get('description'):
-                result += f"  - Description: {region.get('description')}\n"
+            if item.get('description'):
+                result += f"  - Description: {item.get('description')}\n"
+            
+            if item.get('category'):
+                result += f"  - Category: {item.get('category')}\n"
             
             result += "\n"
         
         return result
         
     except SiteBayError as e:
-        return f"Error listing regions: {str(e)}"
-
-
-@mcp.tool
-async def sitebay_list_templates() -> str:
-    """
-    List all available site templates for quick site creation.
-    
-    Returns:
-        List of available templates with descriptions
-    """
-    try:
-        client = await initialize_client()
-        templates = await client.list_templates()
-        
-        if not templates:
-            return "No templates available."
-        
-        result = f"**Available Site Templates** ({len(templates)} templates):\n\n"
-        
-        for template in templates:
-            result += f"• **{template.get('name', 'Unknown')}**\n"
-            result += f"  - ID: {template.get('id', 'Unknown')}\n"
-            
-            if template.get('description'):
-                result += f"  - Description: {template.get('description')}\n"
-            
-            if template.get('category'):
-                result += f"  - Category: {template.get('category')}\n"
-            
-            result += "\n"
-        
-        return result
-        
-    except SiteBayError as e:
-        return f"Error listing templates: {str(e)}"
+        return f"Error listing ready-made sites: {str(e)}"
 
 
 @mcp.tool
@@ -433,34 +384,32 @@ async def sitebay_list_teams(ctx: Context) -> str:
 @mcp.tool
 async def sitebay_wordpress_proxy(
     ctx: Context,
-    site_fqdn: str,
-    endpoint: str,
-    method: str = "GET",
-    data: Optional[dict] = None
+    fqdn: str,
+    path: Optional[str] = None,
+    query_params_json: Optional[str] = None,
+    method: str = "get",
 ) -> str:
     """
     Proxy requests to a WordPress site's REST API.
     
     Args:
-        site_fqdn: The site domain
-        endpoint: WordPress API endpoint (e.g., "/wp/v2/posts")
-        method: HTTP method (GET, POST, PUT, DELETE)
-        data: Optional data for POST/PUT requests
+        fqdn: The site domain
+        path: WordPress API path (e.g., "/wp-json/wp/v2/posts")
+        query_params_json: Optional JSON string for payload or query params
+        method: HTTP method (get, post, put, delete)
     
     Returns:
         WordPress API response
     """
     try:
-        await ctx.info(f"WordPress proxy request to {site_fqdn}{endpoint}")
+        await ctx.info(f"WordPress proxy request to {fqdn}{path or ''}")
         
         client = await initialize_client()
-        proxy_data: dict[str, Any] = {
-            "site_fqdn": site_fqdn,
-            "endpoint": endpoint,
-            "method": method
-        }
-        if data:
-            proxy_data["data"] = data
+        proxy_data: dict[str, Any] = {"fqdn": fqdn, "method": method}
+        if path is not None:
+            proxy_data["path"] = path
+        if query_params_json is not None:
+            proxy_data["query_params_json"] = query_params_json
             
         result = await client.wordpress_proxy(proxy_data)
         return f"✅ WordPress API Response:\n```json\n{result}\n```"
@@ -476,37 +425,32 @@ async def sitebay_wordpress_proxy(
 @mcp.tool
 async def sitebay_shopify_proxy(
     ctx: Context,
-    shop_domain: str,
-    endpoint: str,
-    access_token: str,
-    method: str = "GET",
-    data: Optional[dict] = None
+    shop_name: str,
+    path: Optional[str] = None,
+    query_params_json: Optional[str] = None,
+    method: str = "get",
 ) -> str:
     """
     Proxy requests to a Shopify Admin API.
     
     Args:
-        shop_domain: Shopify shop domain (e.g., "myshop.myshopify.com")
-        endpoint: Shopify API endpoint (e.g., "/admin/api/2023-10/products.json")
-        access_token: Shopify access token
-        method: HTTP method (GET, POST, PUT, DELETE)
-        data: Optional data for POST/PUT requests
+        shop_name: Shopify shop name
+        path: Shopify API path (e.g., "/admin/api/2024-04/products.json")
+        query_params_json: Optional JSON string for payload or query params
+        method: HTTP method (get, post, put, delete)
     
     Returns:
         Shopify API response
     """
     try:
-        await ctx.info(f"Shopify proxy request to {shop_domain}{endpoint}")
+        await ctx.info(f"Shopify proxy request to {shop_name}{path or ''}")
         
         client = await initialize_client()
-        proxy_data: dict[str, Any] = {
-            "shop_domain": shop_domain,
-            "endpoint": endpoint,
-            "access_token": access_token,
-            "method": method
-        }
-        if data:
-            proxy_data["data"] = data
+        proxy_data: dict[str, Any] = {"shop_name": shop_name, "method": method}
+        if path is not None:
+            proxy_data["path"] = path
+        if query_params_json is not None:
+            proxy_data["query_params_json"] = query_params_json
             
         result = await client.shopify_proxy(proxy_data)
         return f"✅ Shopify API Response:\n```json\n{result}\n```"
@@ -522,31 +466,28 @@ async def sitebay_shopify_proxy(
 @mcp.tool
 async def sitebay_posthog_proxy(
     ctx: Context,
-    endpoint: str,
-    data: dict,
-    api_key: Optional[str] = None
+    path: str,
+    query_params_json: Optional[str] = None,
+    method: str = "get",
 ) -> str:
     """
     Proxy POST requests to PostHog analytics API.
     
     Args:
-        endpoint: PostHog API endpoint
-        data: Data to send to PostHog
-        api_key: Optional PostHog API key
+        path: PostHog API path
+        query_params_json: Optional JSON string for payload or query params
+        method: HTTP method (get, post, put, delete)
     
     Returns:
         PostHog API response
     """
     try:
-        await ctx.info(f"PostHog proxy request to {endpoint}")
+        await ctx.info(f"PostHog proxy request to {path}")
         
         client = await initialize_client()
-        proxy_data: dict[str, Any] = {
-            "endpoint": endpoint,
-            "data": data
-        }
-        if api_key:
-            proxy_data["api_key"] = api_key
+        proxy_data: dict[str, Any] = {"path": path, "method": method}
+        if query_params_json is not None:
+            proxy_data["query_params_json"] = query_params_json
             
         result = await client.posthog_proxy(proxy_data)
         return f"✅ PostHog API Response:\n```json\n{result}\n```"
@@ -559,102 +500,7 @@ async def sitebay_posthog_proxy(
         return f"❌ Unexpected error: {str(e)}"
 
 
-# Staging Tools
-@mcp.tool
-async def sitebay_staging_create(
-    ctx: Context,
-    fqdn: str,
-    staging_subdomain: Optional[str] = None
-) -> str:
-    """
-    Create a staging site for testing changes.
-    
-    Args:
-        fqdn: The live site domain
-        staging_subdomain: Optional custom staging subdomain
-    
-    Returns:
-        Staging site creation confirmation
-    """
-    try:
-        await ctx.info(f"Creating staging site for {fqdn}")
-        
-        
-        client = await initialize_client()
-        staging_data = {}
-        if staging_subdomain:
-            staging_data["staging_subdomain"] = staging_subdomain
-            
-        result = await client.create_staging_site(fqdn, staging_data)
-        
-        
-        await ctx.info(f"Successfully created staging site for {fqdn}")
-        return f"✅ **Staging Site Created**\n\nStaging environment for {fqdn} is now available for testing changes safely."
-        
-    except SiteBayError as e:
-        await ctx.error(f"Error creating staging site: {str(e)}")
-        return f"❌ Staging Creation Error: {str(e)}"
-    except Exception as e:
-        await ctx.error(f"Unexpected staging error: {str(e)}")
-        return f"❌ Unexpected error: {str(e)}"
-
-
-@mcp.tool
-async def sitebay_staging_delete(ctx: Context, fqdn: str) -> str:
-    """
-    Delete the staging site.
-    
-    Args:
-        fqdn: The live site domain
-    
-    Returns:
-        Staging deletion confirmation
-    """
-    try:
-        await ctx.info(f"Deleting staging site for {fqdn}")
-        
-        client = await initialize_client()
-        await client.delete_staging_site(fqdn)
-        
-        await ctx.info(f"Successfully deleted staging site for {fqdn}")
-        return f"✅ **Staging Site Deleted**\n\nThe staging environment for {fqdn} has been removed."
-        
-    except SiteBayError as e:
-        await ctx.error(f"Error deleting staging site: {str(e)}")
-        return f"❌ Staging Deletion Error: {str(e)}"
-    except Exception as e:
-        await ctx.error(f"Unexpected staging error: {str(e)}")
-        return f"❌ Unexpected error: {str(e)}"
-
-
-@mcp.tool
-async def sitebay_staging_commit(ctx: Context, fqdn: str) -> str:
-    """
-    Commit staging changes to live site (sync staging to live).
-    
-    Args:
-        fqdn: The live site domain
-    
-    Returns:
-        Staging commit confirmation
-    """
-    try:
-        await ctx.info(f"Committing staging changes for {fqdn}")
-        
-        
-        client = await initialize_client()
-        result = await client.commit_staging_site(fqdn)
-        
-        
-        await ctx.info(f"Successfully committed staging for {fqdn}")
-        return f"✅ **Staging Committed to Live**\n\nChanges from staging have been synchronized to the live site {fqdn}."
-        
-    except SiteBayError as e:
-        await ctx.error(f"Error committing staging: {str(e)}")
-        return f"❌ Staging Commit Error: {str(e)}"
-    except Exception as e:
-        await ctx.error(f"Unexpected staging error: {str(e)}")
-        return f"❌ Unexpected error: {str(e)}"
+# Staging tools removed (no longer supported)
 
 
 # Backup/Restore Tools
@@ -708,37 +554,57 @@ async def sitebay_backup_list_commits(
 async def sitebay_backup_restore(
     ctx: Context,
     fqdn: str,
-    commit_id: str,
-    restore_type: str = "full"
+    restore_point: Optional[str] = None,
+    for_stage_site: Optional[bool] = None,
+    restore_db: Optional[bool] = None,
+    restore_wp_content: Optional[bool] = None,
+    delete_extra_files: Optional[bool] = None,
+    dolt_restore_hash: Optional[str] = None,
+    is_dry_run: Optional[bool] = None,
 ) -> str:
     """
     Restore a site to a previous point in time.
     
-    Args:
+    Args (PITRestoreCreate schema):
         fqdn: The site domain
-        commit_id: The backup commit ID to restore from
-        restore_type: Type of restore ("full", "database", "files")
+        restore_point: ISO datetime string (or omit for latest)
+        for_stage_site: Whether to restore the stage site
+        restore_db: Restore database (default true)
+        restore_wp_content: Restore wp-content (default true)
+        delete_extra_files: Delete extra files from target (default false)
+        dolt_restore_hash: Optional Dolt hash to restore DB
+        is_dry_run: Simulate restore without applying changes
     
     Returns:
         Restore operation confirmation
     """
     try:
         await ctx.info(f"Starting point-in-time restore for {fqdn}")
-        
-        
         client = await initialize_client()
-        restore_data = {
-            "commit_id": commit_id,
-            "restore_type": restore_type
-        }
-        
-        
+
+        restore_data: dict[str, Any] = {}
+        if restore_point is not None:
+            restore_data["restore_point"] = restore_point
+        if for_stage_site is not None:
+            restore_data["for_stage_site"] = for_stage_site
+        if restore_db is not None:
+            restore_data["restore_db"] = restore_db
+        if restore_wp_content is not None:
+            restore_data["restore_wp_content"] = restore_wp_content
+        if delete_extra_files is not None:
+            restore_data["delete_extra_files"] = delete_extra_files
+        if dolt_restore_hash is not None:
+            restore_data["dolt_restore_hash"] = dolt_restore_hash
+        if is_dry_run is not None:
+            restore_data["is_dry_run"] = is_dry_run
+
         result = await client.create_restore(fqdn, restore_data)
-        
-        
+
         await ctx.info(f"Successfully initiated restore for {fqdn}")
-        return f"✅ **Point-in-Time Restore Initiated**\n\nRestore operation for {fqdn} has been started. The site will be restored to the selected backup point."
-        
+        return (
+            "✅ **Point-in-Time Restore Initiated**\n\n"
+            f"Restore operation for {fqdn} has been started."
+        )
     except SiteBayError as e:
         await ctx.error(f"Error starting restore: {str(e)}")
         return f"❌ Restore Error: {str(e)}"
@@ -862,7 +728,7 @@ async def account_summary_resource(ctx: Context) -> str:
     Get account summary as a readable resource.
     
     Returns:
-        JSON formatted account overview including site counts, regions, and recent activity
+        JSON formatted account overview including site counts, ready-made catalog size, and recent activity
     """
     return await resources.get_account_summary_resource(ctx)
 
@@ -874,16 +740,86 @@ async def cleanup():
         await sitebay_client.close()
 
 
+def _run_stdio():
+    """Run the MCP server over STDIO (default)."""
+    mcp.run()
+
+
+def _run_http(host: str, port: int):
+    """Run the MCP server over HTTP (streamable)."""
+    # FastMCP >= 2.9 provides HTTP transport via run_http
+    if not hasattr(mcp, "run_http"):
+        raise RuntimeError(
+            "FastMCP does not support HTTP transport in this environment. "
+            "Please upgrade fastmcp to >= 2.9."
+        )
+    print(f"Starting SiteBay MCP HTTP server on http://{host}:{port}")
+    mcp.run_http(host=host, port=port)
+
+
 def main():
-    """Main entry point for the MCP server"""
+    """Main entry point for the MCP server.
+
+    Supports both STDIO (default) and HTTP transport. Use one of:
+      - stdio (default): `sitebay-mcp`
+      - http:           `sitebay-mcp --http --port 7823 --host 0.0.0.0`
+
+    Environment variables (used if flags not provided):
+      - MCP_TRANSPORT=stdio|http
+      - MCP_HTTP_HOST (default: 127.0.0.1)
+      - MCP_HTTP_PORT or PORT (default: 7823)
+    """
+    parser = argparse.ArgumentParser(prog="sitebay-mcp", add_help=True)
+    parser.add_argument(
+        "--http",
+        action="store_true",
+        help="Run the MCP server using HTTP transport (streamable)",
+    )
+    parser.add_argument(
+        "--transport",
+        choices=["stdio", "http"],
+        help="Transport mode (overrides --http)",
+    )
+    parser.add_argument(
+        "--host",
+        default=None,
+        help="HTTP host to bind (default: 127.0.0.1)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help="HTTP port to bind (default: 7823)",
+    )
+
+    args = parser.parse_args()
+
+    # Resolve transport
+    env_transport = os.getenv("MCP_TRANSPORT")
+    transport = (
+        args.transport
+        if args.transport
+        else ("http" if args.http else (env_transport or "stdio"))
+    )
+
+    # Set up cleanup
     try:
-        # Set up cleanup
         import atexit
         atexit.register(lambda: asyncio.run(cleanup()))
-        
-        # Run the FastMCP server
-        mcp.run()
-        
+    except Exception:
+        pass
+
+    try:
+        if transport == "http":
+            host = args.host or os.getenv("MCP_HTTP_HOST") or "127.0.0.1"
+            port = (
+                args.port
+                or int(os.getenv("MCP_HTTP_PORT") or os.getenv("PORT") or 7823)
+            )
+            _run_http(host, port)
+        else:
+            _run_stdio()
+
     except KeyboardInterrupt:
         print("\nShutting down SiteBay MCP Server...")
         asyncio.run(cleanup())

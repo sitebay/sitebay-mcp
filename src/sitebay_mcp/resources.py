@@ -34,7 +34,7 @@ async def get_site_config_resource(ctx: Context, site_fqdn: str) -> str:
         config = {
             "site_info": {
                 "domain": site.get("fqdn"),
-                "title": site.get("wp_title"),
+                "title": site.get("wordpress_blog_name") or site.get("wp_title"),
                 "status": site.get("status"),
                 "region": site.get("region_name"),
                 "created": site.get("created_at"),
@@ -129,15 +129,14 @@ async def get_account_summary_resource(ctx: Context) -> str:
         # Get sites and teams in parallel
         sites = await client.list_sites()
         teams = await client.list_teams()
-        regions = await client.list_regions()
-        templates = await client.list_templates()
+        # Regions endpoint removed; ready-made sites replaces templates
+        ready_made_sites = await client.list_ready_made_sites()
         
         summary: dict[str, Any] = {
             "account_overview": {
                 "total_sites": len(sites),
                 "total_teams": len(teams),
-                "available_regions": len(regions),
-                "available_templates": len(templates)
+                "available_ready_made_sites": len(ready_made_sites)
             },
             "sites_by_status": {},
             "sites_by_region": {},

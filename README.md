@@ -1,32 +1,30 @@
 # SiteBay MCP Server
 [![smithery badge](https://smithery.ai/badge/@sitebay/sitebay-mcp)](https://smithery.ai/server/@sitebay/sitebay-mcp)
 
-A Model Context Protocol (MCP) server that provides Claude Code users with direct access to the SiteBay WordPress hosting platform. Manage your hosted WordPress sites, execute server commands, handle staging environments, and more through natural language interactions with the SiteBay cloud infrastructure.
+A Model Context Protocol (MCP) server that provides Claude Code users with direct access to the SiteBay WordPress hosting platform. Manage your hosted WordPress sites, execute server commands, and more through natural language interactions with the SiteBay cloud infrastructure.
 
 ## Features
 
 ### 🌐 Site Management
 - List all your hosted WordPress sites
 - Get detailed site information (status, region, PHP version, etc.)
-- Create new WordPress sites using SiteBay's templates
+- Create new WordPress sites using SiteBay's ready-made sites
 - Update site configurations (PHP version, admin credentials, etc.)
-- Delete sites with safety confirmations
+- Delete sites
 
 ### ⚡ Site Operations
 - Execute shell commands and WP-CLI commands on SiteBay servers
 - Edit files in wp-content directory on your hosted sites
 - View site events and deployment logs from SiteBay infrastructure  
-- Manage external path configurations for URL proxying through SiteBay
+ 
 
 ### 🛠 Advanced Features
-- Staging site management on SiteBay infrastructure (coming soon)
 - Point-in-time backup restores from SiteBay's backup system (coming soon)
 - Team management for collaborative hosting (coming soon)
 - WordPress/Shopify/PostHog API proxy services through SiteBay (coming soon)
 
 ### 🗺 Helper Tools
-- List available SiteBay hosting regions
-- Browse SiteBay's WordPress templates
+- Browse SiteBay's ready-made sites
 - Account and billing information (coming soon)
 
 ## Installation
@@ -48,6 +46,40 @@ uvx sitebay-mcp
 # Or install for repeated use
 uv tool install sitebay-mcp
 sitebay-mcp
+
+## HTTP Transport (Recommended for hosted deployments)
+
+This server now supports Streamable HTTP transport in addition to STDIO. Use HTTP for hosted or remote deployments and to comply with Smithery’s hosted requirements.
+
+### Run over HTTP
+
+```bash
+# Defaults to 127.0.0.1:7823
+uvx sitebay-mcp --http
+
+# Or specify host/port
+uvx sitebay-mcp --http --host 0.0.0.0 --port 7823
+
+# Environment variables also supported
+MCP_TRANSPORT=http MCP_HTTP_HOST=0.0.0.0 MCP_HTTP_PORT=7823 uvx sitebay-mcp
+```
+
+### Configure Claude Desktop for HTTP
+
+Add a server URL entry instead of a command:
+
+```json
+{
+  "mcpServers": {
+    "sitebay": {
+      "url": "http://127.0.0.1:7823",
+      "env": {
+        "SITEBAY_API_TOKEN": "your_api_token_here"
+      }
+    }
+  }
+}
+```
 ```
 
 ### Using pip
@@ -75,7 +107,7 @@ pip install -e .
 
 Add the following to your Claude Desktop configuration file:
 
-#### For uvx installation:
+#### For uvx installation (STDIO mode):
 ```json
 {
   "mcpServers": {
@@ -90,13 +122,27 @@ Add the following to your Claude Desktop configuration file:
 }
 ```
 
-#### For pip installation:
+#### For pip installation (STDIO mode):
 ```json
 {
   "mcpServers": {
     "sitebay": {
       "command": "python",
       "args": ["-m", "sitebay_mcp.server"],
+      "env": {
+        "SITEBAY_API_TOKEN": "your_api_token_here"
+      }
+    }
+  }
+}
+```
+
+#### For HTTP mode (any installation):
+```json
+{
+  "mcpServers": {
+    "sitebay": {
+      "url": "http://127.0.0.1:7823",
       "env": {
         "SITEBAY_API_TOKEN": "your_api_token_here"
       }
@@ -116,7 +162,7 @@ Add the following to your Claude Desktop configuration file:
 ### Creating a New WordPress Site
 
 ```
-Claude: Create a new WordPress site called "myblog.example.com" with the title "My Amazing Blog", admin username "admin", password "SecurePass123!", and email "me@example.com"
+Claude: Create a new WordPress site on team 00000000-0000-4000-a000-000000000000 with domain "www.example.org". Blog name "Example", admin Jane Smith (email admin@example.org), username "taylor89", password "AStrongPassword". Use ready-made site name "blog-basic" and set Git URL to https://github.com/acme/wp-site
 ```
 
 ### Managing Existing Sites
@@ -126,7 +172,9 @@ Claude: List all my WordPress sites and show their current status
 
 Claude: Get detailed information about myblog.example.com
 
-Claude: Update the PHP version for myblog.example.com to 8.2
+Claude: Enable Cloudflare dev mode for myblog.example.com
+Claude: Set the Git URL for myblog.example.com to https://github.com/acme/wp-site
+Claude: Turn on HTTP auth for myblog.example.com
 ```
 
 ### Executing Commands
@@ -147,20 +195,12 @@ Claude: Edit the style.css file in my active theme on myblog.example.com hosted 
 Claude: Show me recent events and deployment logs for myblog.example.com from SiteBay
 ```
 
-### External Paths (URL Proxying)
-
-```
-Claude: Create an external path "/api" on myblog.example.com that proxies to "https://my-external-api.com" through SiteBay
-
-Claude: List all external path configurations for myblog.example.com on SiteBay
-```
+ 
 
 ### Getting Information
 
 ```
-Claude: Show me all available SiteBay hosting regions
-
-Claude: List all the WordPress templates available on SiteBay for new sites
+Claude: List all the ready-made sites available on SiteBay for new sites
 ```
 
 ## Available Tools
@@ -170,18 +210,16 @@ Claude: List all the WordPress templates available on SiteBay for new sites
 - `sitebay_get_site` - Get detailed information about a hosted site
 - `sitebay_create_site` - Create a new WordPress site on SiteBay infrastructure
 - `sitebay_update_site` - Update site configuration on SiteBay servers
-- `sitebay_delete_site` - Delete a hosted site (with confirmation)
+- `sitebay_delete_site` - Delete a hosted site
 
 ### Site Operations
 - `sitebay_site_shell_command` - Execute shell/WP-CLI commands on SiteBay servers
 - `sitebay_site_edit_file` - Edit files in wp-content on SiteBay-hosted sites
 - `sitebay_site_get_events` - View site events and deployment logs from SiteBay
-- `sitebay_site_external_path_list` - List external path configs on SiteBay
-- `sitebay_site_external_path_create` - Create external path through SiteBay proxy
+ 
 
 ### Helper Tools
-- `sitebay_list_regions` - List available SiteBay hosting regions
-- `sitebay_list_templates` - List WordPress templates available on SiteBay
+- `sitebay_list_ready_made_sites` - List ready-made sites available on SiteBay
 
 ## Security Notes
 
@@ -249,4 +287,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Shell command execution
 - File editing capabilities
 - External path management
-- Region and template listing
+- Ready-made site catalog listing

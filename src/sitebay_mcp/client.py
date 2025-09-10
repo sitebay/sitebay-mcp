@@ -267,35 +267,39 @@ class SiteBayClient:
         return await self.delete(f"/site/{fqdn}")
     
     # Site Operations Methods
-    async def execute_shell_command(self, fqdn: str, command: str) -> Any:
+    async def execute_shell_command(
+        self,
+        fqdn: str,
+        cmd: str,
+        cwd: Optional[str] = None,
+        auto_track_dir: Optional[bool] = None,
+    ) -> Any:
         """Execute a shell command on a site"""
-        return await self.post(f"/site/{fqdn}/cmd", json_data={"cmd": command})
+        payload: Dict[str, Any] = {"cmd": cmd}
+        if cwd is not None:
+            payload["cwd"] = cwd
+        if auto_track_dir is not None:
+            payload["auto_track_dir"] = auto_track_dir
+        return await self.post(f"/site/{fqdn}/cmd", json_data=payload)
     
-    async def edit_file(self, fqdn: str, file_path: str, content: str) -> str:
+    async def edit_file(
+        self,
+        fqdn: str,
+        file_path: str,
+        file_edit_using_search_replace_blocks: str,
+    ) -> str:
         """Edit a file in the site's wp-content directory"""
         return await self.post(
             f"/site/{fqdn}/wpfile_diff_edit",
-            json_data={"path": file_path, "content": content}
+            json_data={
+                "file_path": file_path,
+                "file_edit_using_search_replace_blocks": file_edit_using_search_replace_blocks,
+            },
         )
     
-    async def get_site_events(self, fqdn: str, after_datetime: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Get site events"""
-        params = {"after_datetime": after_datetime} if after_datetime else None
-        response = await self.get(f"/site/{fqdn}/event", params=params)
-        return response.get("results", [])
+    # Site events endpoint removed (not present in schema)
     
-    # Staging Methods
-    async def create_staging_site(self, fqdn: str, staging_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Create a staging site"""
-        return await self.post(f"/site/{fqdn}/stage", json_data=staging_data)
-    
-    async def delete_staging_site(self, fqdn: str) -> Dict[str, Any]:
-        """Delete a staging site"""
-        return await self.delete(f"/site/{fqdn}/stage")
-    
-    async def commit_staging_site(self, fqdn: str) -> Dict[str, Any]:
-        """Commit staging site to live"""
-        return await self.post(f"/site/{fqdn}/stage/commit")
+    # Staging methods removed (no longer supported)
     
     # Backup/Restore Methods
     async def get_backup_commits(self, fqdn: str, number_to_fetch: int = 10) -> List[Dict[str, Any]]:
@@ -313,22 +317,7 @@ class SiteBayClient:
         return response.get("results", [])
     
     # External Path Methods
-    async def list_external_paths(self, fqdn: str) -> List[Dict[str, Any]]:
-        """List external paths for a site"""
-        response = await self.get(f"/site/{fqdn}/external_path")
-        return response.get("results", [])
-    
-    async def create_external_path(self, fqdn: str, path_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Create an external path"""
-        return await self.post(f"/site/{fqdn}/external_path", json_data=path_data)
-    
-    async def update_external_path(self, fqdn: str, path_id: str, path_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Update an external path"""
-        return await self.patch(f"/site/{fqdn}/external_path/{path_id}", json_data=path_data)
-    
-    async def delete_external_path(self, fqdn: str, path_id: str) -> Dict[str, Any]:
-        """Delete an external path"""
-        return await self.delete(f"/site/{fqdn}/external_path/{path_id}")
+    # External path methods removed (no longer supported)
     
     # Proxy Methods
     async def wordpress_proxy(self, proxy_data: Dict[str, Any]) -> Any:
@@ -349,15 +338,11 @@ class SiteBayClient:
         response = await self.get("/team")
         return response.get("results", [])
     
-    # Template and Region Methods
-    async def list_templates(self) -> List[Dict[str, Any]]:
-        """List available templates"""
-        response = await self.get("/template")
+    # Ready-made site catalog
+    async def list_ready_made_sites(self) -> List[Dict[str, Any]]:
+        """List available ready-made sites"""
+        response = await self.get("/ready_made_site")
         return response.get("results", [])
-    
-    async def list_regions(self) -> List[Dict[str, Any]]:
-        """List available regions"""
-        return await self.get("/region")
     
     # Account Methods
     async def get_affiliate_referrals(self) -> List[Dict[str, Any]]:
