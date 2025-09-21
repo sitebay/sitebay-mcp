@@ -84,7 +84,7 @@ async def sitebay_site_edit_file(
         
         text = file_edit_using_search_replace_blocks
         if (
-            "<<<<<<< SEARCH" not in text
+            "<<<<<< SEARCH" not in text
             or "=======" not in text
             or ">>>>>> REPLACE" not in text
         ):
