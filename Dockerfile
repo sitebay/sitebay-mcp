@@ -2,7 +2,9 @@
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    MCP_TRANSPORT=http \
+    PORT=8000
 
 WORKDIR /app
 COPY . /app
@@ -12,4 +14,5 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir hatchling && \
     pip install --no-cache-dir .
 
+EXPOSE 8000
 CMD ["sitebay-mcp"]
