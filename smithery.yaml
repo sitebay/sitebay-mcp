@@ -5,11 +5,17 @@ startCommand:
   # Command that starts the MCP HTTP server with SSE
   commandFunction:
     |-
-    (config) => ({
-      command: 'sitebay-mcp',
-      args: ['--http', '--host', '0.0.0.0', '--port', String(config.port || 7823)],
-      env: { SITEBAY_API_TOKEN: config.sitebayApiToken }
-    })
+    (config) => {
+      const port = config.port || process.env.PORT || 7823;
+      const host = config.host || '127.0.0.1';
+
+      return {
+        command: 'sitebay-mcp',
+        args: ['--http', '--host', '0.0.0.0', '--port', String(port)],
+        env: { SITEBAY_API_TOKEN: config.sitebayApiToken },
+        url: `http://${host}:${port}`
+      };
+    }
   configSchema:
     # JSON Schema defining the configuration options for the MCP.
     type: object
@@ -22,6 +28,9 @@ startCommand:
       port:
         type: number
         description: Port to bind (defaults to 7823)
+      host:
+        type: string
+        description: Hostname Smithery should use to reach the HTTP server (defaults to 127.0.0.1)
   exampleConfig:
     sitebayApiToken: your_sitebay_api_token_here
     port: 7823
