@@ -37,12 +37,7 @@ async def initialize_client() -> SiteBayClient:
         try:
             auth = SiteBayAuth()
             sitebay_client = SiteBayClient(auth)
-            # Test the connection using a lightweight, public endpoint
-            try:
-                await sitebay_client.list_ready_made_sites()
-            except Exception:
-                # Non-fatal for initialization; auth/transport issues will surface later
-                pass
+            # Avoid upfront network calls during initialization so startup stays fast.
             
         except Exception as e:
             raise ConfigurationError(f"Failed to initialize SiteBay client: {str(e)}")
