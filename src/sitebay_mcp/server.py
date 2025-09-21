@@ -11,6 +11,7 @@ import argparse
 from typing import Any, Optional
 from pydantic import UUID4
 
+import fastmcp
 from fastmcp import FastMCP
 from fastmcp.server import Context
 from .auth import SiteBayAuth
@@ -728,14 +729,21 @@ def _run_stdio():
 
 def _run_http(host: str, port: int):
     """Run the MCP server over HTTP (streamable)."""
-    # FastMCP >= 2.9 provides HTTP transport via run_http
-    if not hasattr(mcp, "run_http"):
+    server_url = f"http://{host}:{port}{fastmcp.settings.streamable_http_path}"
+
+    if hasattr(mcp, "run_http_async"):
+        print(f"Starting SiteBay MCP HTTP server on {server_url}")
+        asyncio.run(
+            mcp.run_http_async(host=host, port=port, transport="streamable-http")
+        )
+    elif hasattr(mcp, "run_http"):
+        print(f"Starting SiteBay MCP HTTP server on {server_url}")
+        mcp.run_http(host=host, port=port)
+    else:
         raise RuntimeError(
             "FastMCP does not support HTTP transport in this environment. "
             "Please upgrade fastmcp to >= 2.9."
         )
-    print(f"Starting SiteBay MCP HTTP server on http://{host}:{port}")
-    mcp.run_http(host=host, port=port)
 
 
 def main():
