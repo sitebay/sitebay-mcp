@@ -90,7 +90,7 @@ async def sitebay_get_site(ctx: Context, fqdn: str) -> str:
     Get detailed information about a specific WordPress site.
     
     Args:
-        fqdn: The fully qualified domain name of the site (e.g., "example.com")
+        fqdn: The fully qualified domain name of the site (e.g., "www.example.com")
     
     Returns:
         Detailed site information including status, versions, URLs, and configuration
@@ -283,7 +283,7 @@ async def sitebay_site_edit_file(
     
     Args:
         fqdn: The fully qualified domain name of the site
-        file_path: Path to the file relative to wp-content (e.g., "themes/mytheme/style.css")
+        file_path: Path to the file in wp-content (e.g., "wp-content/themes/mytheme/style.css")
         content: New content for the file
     
     Returns:
@@ -654,7 +654,7 @@ async def sitebay_account_create_checkout(
     Create a Stripe checkout session for team billing.
     
     Args:
-        plan_name: Plan type ("starter", "pro", "enterprise")
+        plan_name: Plan type ("starter", "business", "micro")
         interval: Billing interval ("month", "year")
         team_id: Optional team ID to purchase for
     
