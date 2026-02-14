@@ -1,0 +1,40 @@
+# Smithery configuration file: https://smithery.ai/docs/build/project-config
+
+startCommand:
+  type: http
+  # Command that starts the MCP HTTP server with SSE
+  commandFunction:
+    |-
+    (config) => {
+      const port = config.port || process.env.PORT || 7823;
+      const host = config.host || '127.0.0.1';
+
+      return {
+        command: 'sitebay-mcp',
+        args: ['--http', '--host', '0.0.0.0', '--port', String(port)],
+        env: {
+          SITEBAY_API_TOKEN: config.sitebayApiToken,
+          PORT: String(port)
+        },
+        url: `http://${host}:${port}`,
+        ssePath: '/sse'
+      };
+    }
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP.
+    type: object
+    required:
+      - sitebayApiToken
+    properties:
+      sitebayApiToken:
+        type: string
+        description: Your SiteBay API token
+      port:
+        type: number
+        description: Port to bind (defaults to 7823)
+      host:
+        type: string
+        description: Hostname Smithery should use to reach the HTTP server (defaults to 127.0.0.1)
+  exampleConfig:
+    sitebayApiToken: your_sitebay_api_token_here
+    port: 7823

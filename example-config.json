@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "sitebay-stdio": {
+      "command": "uvx",
+      "args": ["sitebay-mcp"],
+      "env": {
+        "SITEBAY_API_TOKEN": "your_sitebay_api_token_here"
+      }
+    },
+    "sitebay-http": {
+      "url": "http://127.0.0.1:7823",
+      "env": {
+        "SITEBAY_API_TOKEN": "your_sitebay_api_token_here"
+      }
+    }
+  }
+}
