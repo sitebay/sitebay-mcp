@@ -1,46 +1,80 @@
-# SiteBay MCP Server
-[![smithery badge](https://smithery.ai/badge/@sitebay/sitebay-mcp)](https://smithery.ai/server/@sitebay/sitebay-mcp)
+<div align="center">
 
-A Model Context Protocol (MCP) server that provides Claude Code users with direct access to the SiteBay WordPress hosting platform. Manage your hosted WordPress sites, execute server commands, and more through natural language interactions with the SiteBay cloud infrastructure.
+# 🚀 SiteBay MCP Server
 
-## Features
+[![Smithery](https://smithery.ai/badge/@sitebay/sitebay-mcp)](https://smithery.ai/server/@sitebay/sitebay-mcp)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![MCP](https://img.shields.io/badge/MCP-Compatible-purple.svg)](https://modelcontextprotocol.io)
+
+**Manage WordPress hosting through natural language with Claude**
+
+[Features](#-features) • [Installation](#-installation) • [Configuration](#-configuration) • [Usage](#-usage-examples) • [Support](#-support)
+
+</div>
+
+---
+
+A **Model Context Protocol (MCP)** server that gives Claude direct access to the [SiteBay](https://sitebay.org) WordPress hosting platform. Manage sites, execute commands, and control your cloud infrastructure—all through conversation.
+
+---
+
+## ✨ Features
+
+<table>
+<tr>
+<td width="50%">
 
 ### 🌐 Site Management
 - List all your hosted WordPress sites
 - Get detailed site information (active, HTTP auth, plan)
-- Create new WordPress sites using SiteBay's ready-made sites
-- Update site settings (Cloudflare dev mode, domain, HTTP auth, Git URL)
+- Create new WordPress sites using ready-made templates
+- Update settings (Cloudflare, domain, HTTP auth, Git URL)
 - Delete sites
 
+</td>
+<td width="50%">
+
 ### ⚡ Site Operations
-- Execute shell commands and WP-CLI commands on SiteBay servers
-- Edit files in wp-content directory on your hosted sites
- 
- 
+- Execute shell commands on SiteBay servers
+- Run WP-CLI commands directly
+- Edit files in wp-content directory
+
+</td>
+</tr>
+<tr>
+<td width="50%">
 
 ### 🛠 Advanced Features
-- Point-in-time backup restores from SiteBay's backup system (coming soon)
-- Team management for collaborative hosting (coming soon)
-- WordPress/Shopify/PostHog API proxy services through SiteBay (coming soon)
+- 🔜 Point-in-time backup restores
+- 🔜 Team management for collaborative hosting
+- 🔜 WordPress/Shopify/PostHog API proxy
+
+</td>
+<td width="50%">
 
 ### 🗺 Helper Tools
-- Browse SiteBay's ready-made sites
-- Account and billing information (coming soon)
+- Browse ready-made site templates
+- 🔜 Account and billing information
 
-## Installation
+</td>
+</tr>
+</table>
 
-### Installing via Smithery
+---
 
-To install SiteBay MCP for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@sitebay/sitebay-mcp):
+## 📦 Installation
+
+### 🎯 Via Smithery (Fastest)
 
 ```bash
 npx -y @smithery/cli install @sitebay/sitebay-mcp --client claude
 ```
 
-### Using uvx (Recommended)
+### 📦 Using uvx (Recommended)
 
 ```bash
-# Install and run directly with uvx
+# Install and run directly
 uvx sitebay-mcp
 
 # Or install for repeated use
@@ -48,11 +82,12 @@ uv tool install sitebay-mcp
 sitebay-mcp
 ```
 
-## HTTP Transport (Recommended for hosted deployments)
+### 🌐 HTTP Transport
 
-This server now supports Streamable HTTP transport in addition to STDIO. Use HTTP for hosted or remote deployments and to comply with Smithery’s hosted requirements.
+> 💡 **Recommended for hosted deployments**
 
-### Run over HTTP
+<details>
+<summary><strong>📡 Run over HTTP</strong></summary>
 
 ```bash
 # Defaults to 127.0.0.1:7823
@@ -65,49 +100,35 @@ uvx sitebay-mcp --http --host 0.0.0.0 --port 7823
 MCP_TRANSPORT=http MCP_HTTP_HOST=0.0.0.0 MCP_HTTP_PORT=7823 uvx sitebay-mcp
 ```
 
-### Configure Claude Desktop for HTTP
+</details>
 
-Add a server URL entry instead of a command:
-
-```json
-{
-  "mcpServers": {
-    "sitebay": {
-      "url": "http://127.0.0.1:7823",
-      "env": {
-        "SITEBAY_API_TOKEN": "your_api_token_here"
-      }
-    }
-}
-}
-```
-
-### Using pip
+### 🐍 Using pip
 
 ```bash
-# Install from PyPI (when published)
 pip install sitebay-mcp
 
-# Or install from source
-git clone https://github.com/your-username/sitebay-mcp.git
-cd sitebay-mcp
-pip install -e .
+# Or from source
+git clone https://github.com/sitebay/sitebay-mcp.git
+cd sitebay-mcp && pip install -e .
 ```
 
-## Configuration
+---
 
-### 1. Get Your SiteBay API Token
+## ⚙️ Configuration
 
-1. Log in to your [SiteBay account](https://my.sitebay.org)
-2. Navigate to Settings in your account dashboard
-3. Generate a new API token
-4. Copy the token for use in configuration
+### Step 1: Get Your API Token
 
-### 2. Configure Claude Desktop
+1. Log in to [my.sitebay.org](https://my.sitebay.org)
+2. Navigate to **Settings** → **API Tokens**
+3. Generate and copy your token
 
-Add the following to your Claude Desktop configuration file:
+### Step 2: Configure Claude Desktop
 
-#### For uvx installation (STDIO mode):
+Choose your installation method:
+
+<details>
+<summary><strong>📦 uvx (STDIO mode)</strong></summary>
+
 ```json
 {
   "mcpServers": {
@@ -122,7 +143,11 @@ Add the following to your Claude Desktop configuration file:
 }
 ```
 
-#### For pip installation (STDIO mode):
+</details>
+
+<details>
+<summary><strong>🐍 pip (STDIO mode)</strong></summary>
+
 ```json
 {
   "mcpServers": {
@@ -137,7 +162,11 @@ Add the following to your Claude Desktop configuration file:
 }
 ```
 
-#### For HTTP mode (any installation):
+</details>
+
+<details>
+<summary><strong>🌐 HTTP mode</strong></summary>
+
 ```json
 {
   "mcpServers": {
@@ -151,138 +180,141 @@ Add the following to your Claude Desktop configuration file:
 }
 ```
 
-### 3. Claude Desktop Configuration File Locations
+</details>
 
-- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows**: `%APPDATA%\\Claude\\claude_desktop_config.json`
-- **Linux**: `~/.config/claude/claude_desktop_config.json`
+### Config File Locations
 
-## Usage Examples
+| Platform | Path |
+|----------|------|
+| 🍎 macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| 🪟 Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
+| �� Linux | `~/.config/claude/claude_desktop_config.json` |
 
-### Creating a New WordPress Site
+---
 
-```
-Claude: Create a new WordPress site on team 00000000-0000-4000-a000-000000000000 with domain "www.example.org". Blog name "Example", admin Jane Smith (email admin@example.org), username "taylor89", password "AStrongPassword". Use ready-made site name "blog-basic" and set Git URL to https://github.com/acme/wp-site
-```
+## 💬 Usage Examples
 
-### Managing Existing Sites
-
-```
-Claude: List all my WordPress sites and show their current status
-
-Claude: Get detailed information about myblog.example.com
-
-Claude: Enable Cloudflare dev mode for myblog.example.com
-Claude: Set the Git URL for myblog.example.com to https://github.com/acme/wp-site
-Claude: Turn on HTTP auth for myblog.example.com
-```
-
-### Executing Commands
+### 🆕 Create a Site
 
 ```
-Claude: Run "wp plugin list" on myblog.example.com to see what plugins are installed on the SiteBay server
-
-Claude: Execute "wp search-replace 'http://old-domain.com' 'https://new-domain.com'" on myblog.example.com through SiteBay
-
-Claude: Check the disk usage on myblog.example.com with "df -h" on the SiteBay server
+Create a new WordPress site on team 00000000-0000-4000-a000-000000000000 
+with domain "www.example.org", blog name "Example", admin Jane Smith 
+(email admin@example.org), username "taylor89", password "AStrongPassword". 
+Use ready-made site "blog-basic" and set Git URL to https://github.com/acme/wp-site
 ```
 
-### File Management
+### 📋 Manage Sites
 
 ```
-Claude: Edit the style.css file in my active theme on myblog.example.com hosted on SiteBay
+List all my WordPress sites and show their current status
+Get detailed information about myblog.example.com
+Enable Cloudflare dev mode for myblog.example.com
+Turn on HTTP auth for myblog.example.com
 ```
 
- 
-
-### Getting Information
+### 🖥️ Execute Commands
 
 ```
-Claude: List all the ready-made sites available on SiteBay for new sites
+Run "wp plugin list" on myblog.example.com
+Execute "wp search-replace 'http://old.com' 'https://new.com'" on myblog.example.com
+Check disk usage on myblog.example.com with "df -h"
 ```
 
-## Available Tools
+### 📁 File Management
 
-### Site Management
-- `sitebay_list_sites` - List all WordPress sites hosted on SiteBay
-- `sitebay_get_site` - Get detailed information about a hosted site
-- `sitebay_create_site` - Create a new WordPress site on SiteBay infrastructure
-- `sitebay_update_site` - Update site configuration on SiteBay servers
-- `sitebay_delete_site` - Delete a hosted site
+```
+Edit the style.css file in my active theme on myblog.example.com
+```
 
-### Site Operations
-- `sitebay_site_shell_command` - Execute shell/WP-CLI commands on SiteBay servers
-- `sitebay_site_edit_file` - Edit files in wp-content on SiteBay-hosted sites
- 
- 
+---
 
-### Helper Tools
-- `sitebay_list_ready_made_sites` - List ready-made sites available on SiteBay
+## 🧰 Available Tools
 
-## Security Notes
+| Tool | Description |
+|------|-------------|
+| `sitebay_list_sites` | List all WordPress sites hosted on SiteBay |
+| `sitebay_get_site` | Get detailed information about a hosted site |
+| `sitebay_create_site` | Create a new WordPress site on SiteBay |
+| `sitebay_update_site` | Update site configuration |
+| `sitebay_delete_site` | Delete a hosted site |
+| `sitebay_site_shell_command` | Execute shell/WP-CLI commands |
+| `sitebay_site_edit_file` | Edit files in wp-content |
+| `sitebay_list_ready_made_sites` | List available ready-made templates |
 
-- Your SiteBay API token is stored securely in environment variables
-- All communications with SiteBay infrastructure use HTTPS encryption
-- API tokens can be revoked at any time from your SiteBay account dashboard
-- The MCP server runs locally and only proxies requests to SiteBay - no data is stored locally
+---
 
-## Error Handling
+## 🔒 Security
 
-The server provides clear error messages for common issues:
+- ✅ API tokens stored securely in environment variables
+- ✅ All communications use HTTPS encryption
+- ✅ Tokens can be revoked anytime from your dashboard
+- ✅ MCP server runs locally—no data stored
 
-- **Authentication errors**: Invalid or expired API tokens
-- **Site not found**: When referencing non-existent sites
-- **Validation errors**: Invalid parameters or missing required fields
-- **Network errors**: Connection issues with SiteBay API
+---
 
-## Troubleshooting
+## 🐛 Troubleshooting
 
-### Authentication Issues
+<details>
+<summary><strong>🔑 Authentication Issues</strong></summary>
 
 1. Verify your API token is correct
 2. Check that the token is properly set in the environment variable
 3. Ensure the token hasn't expired
-4. Try regenerating the token from your SiteBay account
+4. Try regenerating from your SiteBay account
 
-### Connection Issues
+</details>
+
+<details>
+<summary><strong>🌐 Connection Issues</strong></summary>
 
 1. Check your internet connection
 2. Verify SiteBay service status
 3. Check firewall settings
 4. Try restarting Claude Desktop
 
-### Tool Not Found
+</details>
+
+<details>
+<summary><strong>🔧 Tool Not Found</strong></summary>
 
 1. Restart Claude Desktop after configuration changes
-2. Verify the configuration file is in the correct location
-3. Check the JSON syntax is valid
+2. Verify the configuration file location
+3. Check JSON syntax is valid
 4. Ensure uvx or Python is properly installed
 
-## Contributing
+</details>
+
+---
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
 4. Add tests for new functionality
-5. Ensure all tests pass and code is properly formatted
+5. Ensure all tests pass
 6. Submit a pull request
 
-## License
+---
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 📄 License
 
-## Support
+MIT License - see [LICENSE](LICENSE) for details.
 
-- **Issues**: GitHub Issues
-- **Documentation**: [SiteBay API Docs](https://my.sitebay.org/f/api/v1/docs)
-- **SiteBay Support**: [SiteBay Help Center](https://sitebay.org/support)
+---
 
-## Changelog
+## 🆘 Support
 
-### v0.1.0 (2024-01-XX)
-- Initial release
-- Site management tools
-- Shell command execution
-- File editing capabilities
-- External path management
-- Ready-made site catalog listing
+| Resource | Link |
+|----------|------|
+| 🐛 Issues | [GitHub Issues](https://github.com/sitebay/sitebay-mcp/issues) |
+| 📖 API Docs | [SiteBay API Documentation](https://my.sitebay.org/f/api/v1/docs) |
+| 💬 Help | [SiteBay Help Center](https://sitebay.org/support) |
+
+---
+
+<div align="center">
+
+**Made with ❤️ by [SiteBay](https://sitebay.org)**
+
+</div>
