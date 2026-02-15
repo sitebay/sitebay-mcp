@@ -1,0 +1,530 @@
+{
+  "payload": {
+    "type": "hosted",
+    "stateful": false,
+    "hasAuthAdapter": false,
+    "configSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "type": "string",
+          "description": "Your SiteBay API token from https://my.sitebay.org"
+        }
+      },
+      "required": [
+        "apiKey"
+      ],
+      "additionalProperties": false
+    },
+    "serverCard": {
+      "serverInfo": {
+        "name": "SiteBay WordPress Hosting",
+        "version": "0.1.0"
+      },
+      "tools": [
+        {
+          "name": "sitebay_list_sites",
+          "description": "List all WordPress sites for the authenticated user",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "team_id": {
+                "description": "Optional team ID to filter sites",
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              }
+            },
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_get_site",
+          "description": "Get detailed information about a specific WordPress site",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "fqdn": {
+                "type": "string",
+                "description": "Site domain (e.g. www.example.com)"
+              }
+            },
+            "required": [
+              "fqdn"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_create_site",
+          "description": "Create a new WordPress site",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "team_id": {
+                "type": "string",
+                "description": "Team UUID that owns the site"
+              },
+              "fqdn": {
+                "type": "string",
+                "description": "Domain for the new site"
+              },
+              "wordpress_blog_name": {
+                "type": "string",
+                "description": "Blog/site title"
+              },
+              "wordpress_first_name": {
+                "type": "string",
+                "description": "Admin first name"
+              },
+              "wordpress_last_name": {
+                "type": "string",
+                "description": "Admin last name"
+              },
+              "wordpress_email": {
+                "type": "string",
+                "format": "email",
+                "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                "description": "Admin email"
+              },
+              "wordpress_username": {
+                "type": "string",
+                "description": "Admin username"
+              },
+              "wordpress_password": {
+                "type": "string",
+                "description": "Admin password"
+              },
+              "git_url": {
+                "description": "Git repository URL",
+                "type": "string"
+              },
+              "ready_made_site_name": {
+                "description": "Ready-made site template name",
+                "type": "string"
+              },
+              "is_free": {
+                "description": "Free plan flag",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "team_id",
+              "fqdn",
+              "wordpress_blog_name",
+              "wordpress_first_name",
+              "wordpress_last_name",
+              "wordpress_email",
+              "wordpress_username",
+              "wordpress_password"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_update_site",
+          "description": "Update an existing WordPress site configuration",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "fqdn": {
+                "type": "string",
+                "description": "Site domain to update"
+              },
+              "cf_dev_mode_enabled": {
+                "description": "Enable/disable Cloudflare dev mode",
+                "type": "boolean"
+              },
+              "new_fqdn": {
+                "description": "Change the site domain",
+                "type": "string"
+              },
+              "git_url": {
+                "description": "Set git repository URL",
+                "type": "string"
+              },
+              "http_auth_enabled": {
+                "description": "Enable/disable HTTP basic auth",
+                "type": "boolean"
+              },
+              "team_id": {
+                "description": "Move site to a different team",
+                "type": "string"
+              },
+              "is_free": {
+                "description": "Toggle free plan",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "fqdn"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_delete_site",
+          "description": "Delete a WordPress site permanently. Cannot be undone.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "fqdn": {
+                "type": "string",
+                "description": "Domain of the site to delete"
+              }
+            },
+            "required": [
+              "fqdn"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_site_shell_command",
+          "description": "Execute a shell command on a WordPress site (supports WP-CLI)",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "fqdn": {
+                "type": "string",
+                "description": "Site domain"
+              },
+              "command": {
+                "type": "string",
+                "description": "Shell command to execute (e.g. 'wp plugin list')"
+              },
+              "cwd": {
+                "description": "Working directory",
+                "type": "string"
+              },
+              "auto_track_dir": {
+                "description": "Auto track directory changes",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "fqdn",
+              "command"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_site_edit_file",
+          "description": "Edit a file in the site's wp-content directory using search/replace blocks",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "fqdn": {
+                "type": "string",
+                "description": "Site domain"
+              },
+              "file_path": {
+                "type": "string",
+                "description": "Path in wp-content (e.g. wp-content/themes/mytheme/style.css)"
+              },
+              "file_edit_using_search_replace_blocks": {
+                "type": "string",
+                "description": "Diff blocks: <<<<<< SEARCH\\nold\\n=======\\nnew\\n>>>>>> REPLACE"
+              }
+            },
+            "required": [
+              "fqdn",
+              "file_path",
+              "file_edit_using_search_replace_blocks"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_list_teams",
+          "description": "List all teams for the authenticated user",
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_list_ready_made_sites",
+          "description": "List available ready-made site templates",
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_wordpress_proxy",
+          "description": "Proxy requests to a WordPress site's REST API",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "fqdn": {
+                "type": "string",
+                "description": "Site domain"
+              },
+              "path": {
+                "default": "/wp-json/wp/v2/",
+                "description": "WordPress API path",
+                "type": "string"
+              },
+              "query_params_json": {
+                "description": "JSON payload or query params",
+                "type": "string"
+              },
+              "method": {
+                "default": "get",
+                "description": "HTTP method",
+                "type": "string",
+                "enum": [
+                  "get",
+                  "post",
+                  "put",
+                  "delete"
+                ]
+              }
+            },
+            "required": [
+              "fqdn"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_shopify_proxy",
+          "description": "Proxy requests to Shopify Admin API",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "shop_name": {
+                "type": "string",
+                "description": "Shopify shop name"
+              },
+              "path": {
+                "default": "/admin/api/2024-04",
+                "description": "Shopify API path",
+                "type": "string"
+              },
+              "query_params_json": {
+                "description": "JSON payload",
+                "type": "string"
+              },
+              "method": {
+                "default": "get",
+                "type": "string",
+                "enum": [
+                  "get",
+                  "post",
+                  "put",
+                  "delete"
+                ]
+              }
+            },
+            "required": [
+              "shop_name"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_posthog_proxy",
+          "description": "Proxy requests to PostHog analytics API",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "PostHog API path"
+              },
+              "query_params_json": {
+                "description": "JSON payload",
+                "type": "string"
+              },
+              "method": {
+                "default": "get",
+                "type": "string",
+                "enum": [
+                  "get",
+                  "post",
+                  "put",
+                  "delete"
+                ]
+              }
+            },
+            "required": [
+              "path"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_backup_list_commits",
+          "description": "List available backup commits for point-in-time restore",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "fqdn": {
+                "type": "string",
+                "description": "Site domain"
+              },
+              "number_to_fetch": {
+                "default": 1,
+                "description": "Number of backups to fetch",
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "fqdn"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_backup_restore",
+          "description": "Restore a site to a previous point in time",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "fqdn": {
+                "type": "string",
+                "description": "Site domain"
+              },
+              "restore_point": {
+                "description": "ISO datetime for restore point",
+                "type": "string"
+              },
+              "restore_db": {
+                "description": "Restore database",
+                "type": "boolean"
+              },
+              "restore_wp_content": {
+                "description": "Restore wp-content",
+                "type": "boolean"
+              },
+              "delete_extra_files": {
+                "description": "Delete extra files",
+                "type": "boolean"
+              },
+              "dolt_restore_hash": {
+                "description": "Dolt hash for DB restore",
+                "type": "string"
+              },
+              "is_dry_run": {
+                "description": "Simulate without applying",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "fqdn"
+            ],
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_account_affiliates",
+          "description": "Get affiliate referral information",
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        },
+        {
+          "name": "sitebay_account_create_checkout",
+          "description": "Create a Stripe checkout session for team billing",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "plan_name": {
+                "default": "starter",
+                "description": "Plan type",
+                "type": "string",
+                "enum": [
+                  "starter",
+                  "business",
+                  "micro"
+                ]
+              },
+              "interval": {
+                "default": "month",
+                "description": "Billing interval",
+                "type": "string",
+                "enum": [
+                  "month",
+                  "year"
+                ]
+              },
+              "team_id": {
+                "description": "Team ID to purchase for",
+                "type": "string"
+              }
+            },
+            "$schema": "http://json-schema.org/draft-07/schema#"
+          },
+          "execution": {
+            "taskSupport": "forbidden"
+          }
+        }
+      ],
+      "resources": [],
+      "prompts": []
+    },
+    "source": {
+      "commit": "29aada78a8fe32fdcd4be4c8f649b92075b9d30f",
+      "branch": "main"
+    }
+  },
+  "artifacts": {
+    "module": "module.js",
+    "sourcemap": "module.js.map"
+  }
+}
