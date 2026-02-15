@@ -5,6 +5,15 @@ import { z } from "zod";
 const BASE_URL = "https://my.sitebay.org";
 const API_PREFIX = "/f/api/v1";
 
+const SERVER_INFO = {
+  name: "sitebay-mcp",
+  title: "SiteBay WordPress Hosting",
+  version: "0.1.0",
+  description: "Manage WordPress sites, run WP-CLI commands, edit files, handle backups, and proxy requests to WordPress/Shopify/PostHog APIs via SiteBay.",
+  websiteUrl: "https://www.sitebay.org",
+  icons: [{ src: "https://www.sitebay.org/icon-512x512.png", mimeType: "image/png", sizes: ["512x512"] }],
+};
+
 interface Config {
   apiKey: string;
 }
@@ -80,12 +89,69 @@ function field(obj: Record<string, unknown>, key: string, fallback = "Unknown"):
   return v !== undefined && v !== null ? String(v) : fallback;
 }
 
-/** Register all 16 SiteBay tools on an McpServer instance */
-function registerTools(server: McpServer, apiKey: string) {
+/** Register all tools, prompts, and resources on an McpServer instance */
+function registerCapabilities(server: McpServer, apiKey: string) {
+  // --- Prompts ---
+
+  server.prompt(
+    "manage-site",
+    "Get guidance on managing a specific WordPress site",
+    { fqdn: z.string().describe("Site domain to manage") },
+    async ({ fqdn }) => ({
+      messages: [{
+        role: "user",
+        content: {
+          type: "text",
+          text: `I want to manage my WordPress site at ${fqdn}. Help me with common tasks like checking site status, running WP-CLI commands, managing plugins/themes, creating backups, and editing files. Start by getting the site details.`,
+        },
+      }],
+    }),
+  );
+
+  server.prompt(
+    "setup-new-site",
+    "Walk through creating a new WordPress site on SiteBay",
+    {},
+    async () => ({
+      messages: [{
+        role: "user",
+        content: {
+          type: "text",
+          text: "I want to create a new WordPress site on SiteBay. First list my teams so I can pick one, then help me set up the site with a domain, admin credentials, and optionally a ready-made template.",
+        },
+      }],
+    }),
+  );
+
+  // --- Resources ---
+
+  server.resource(
+    "sites",
+    "sitebay://sites",
+    { description: "List of all WordPress sites for the authenticated user", mimeType: "application/json" },
+    async () => {
+      const data = await apiRequest(apiKey, "GET", "/site");
+      return { contents: [{ uri: "sitebay://sites", text: JSON.stringify(data, null, 2), mimeType: "application/json" }] };
+    },
+  );
+
+  server.resource(
+    "teams",
+    "sitebay://teams",
+    { description: "List of all teams for the authenticated user", mimeType: "application/json" },
+    async () => {
+      const data = await apiRequest(apiKey, "GET", "/team");
+      return { contents: [{ uri: "sitebay://teams", text: JSON.stringify(data, null, 2), mimeType: "application/json" }] };
+    },
+  );
+
+  // --- Tools ---
+
   server.tool(
     "sitebay_list_sites",
     "List all WordPress sites for the authenticated user",
     { team_id: z.string().uuid().optional().describe("Optional team ID to filter sites") },
+    { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     async ({ team_id }) => {
       const params = team_id ? { team_id } : undefined;
       const data = await apiRequest(apiKey, "GET", "/site", undefined, params);
@@ -107,6 +173,7 @@ function registerTools(server: McpServer, apiKey: string) {
     "sitebay_get_site",
     "Get detailed information about a specific WordPress site",
     { fqdn: z.string().describe("Site domain (e.g. www.example.com)") },
+    { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     async ({ fqdn }) => {
       const site = (await apiRequest(apiKey, "GET", `/site/${fqdn}`)) as Record<string, unknown>;
       let text = `**Site Details for ${fqdn}**\n\n`;
@@ -136,6 +203,7 @@ function registerTools(server: McpServer, apiKey: string) {
       ready_made_site_name: z.string().optional().describe("Ready-made site template name"),
       is_free: z.boolean().optional().describe("Free plan flag"),
     },
+    { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
     async (args) => {
       const body: Record<string, unknown> = {
         team_id: args.team_id,
@@ -173,6 +241,7 @@ function registerTools(server: McpServer, apiKey: string) {
       team_id: z.string().optional().describe("Move site to a different team"),
       is_free: z.boolean().optional().describe("Toggle free plan"),
     },
+    { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     async ({ fqdn, ...updates }) => {
       const body: Record<string, unknown> = {};
       for (const [k, v] of Object.entries(updates)) {
@@ -191,6 +260,7 @@ function registerTools(server: McpServer, apiKey: string) {
     "sitebay_delete_site",
     "Delete a WordPress site permanently. Cannot be undone.",
     { fqdn: z.string().describe("Domain of the site to delete") },
+    { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
     async ({ fqdn }) => {
       await apiRequest(apiKey, "DELETE", `/site/${fqdn}`);
       return { content: [{ type: "text" as const, text: `Site ${fqdn} deleted.` }] };
@@ -206,6 +276,7 @@ function registerTools(server: McpServer, apiKey: string) {
       cwd: z.string().optional().describe("Working directory"),
       auto_track_dir: z.boolean().optional().describe("Auto track directory changes"),
     },
+    { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
     async ({ fqdn, command, cwd, auto_track_dir }) => {
       const body: Record<string, unknown> = { cmd: command };
       if (cwd !== undefined) body.cwd = cwd;
@@ -229,6 +300,7 @@ function registerTools(server: McpServer, apiKey: string) {
         "Diff blocks: <<<<<< SEARCH\\nold\\n=======\\nnew\\n>>>>>> REPLACE",
       ),
     },
+    { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
     async ({ fqdn, file_path, file_edit_using_search_replace_blocks }) => {
       const normalized = file_path.replace("/bitnami/wordpress/wp-content", "wp-content");
       if (!normalized.startsWith("wp-content")) {
@@ -249,30 +321,42 @@ function registerTools(server: McpServer, apiKey: string) {
     },
   );
 
-  server.tool("sitebay_list_teams", "List all teams for the authenticated user", {}, async () => {
-    const data = await apiRequest(apiKey, "GET", "/team");
-    const teams = getResults(data);
-    if (!teams.length) return { content: [{ type: "text" as const, text: "No teams found." }] };
-    let text = `**Your Teams** (${teams.length}):\n\n`;
-    for (const t of teams as Record<string, unknown>[]) {
-      text += `• **${field(t, "name")}**\n`;
-      text += `  - ID: ${field(t, "id")}\n`;
-      text += `  - Plan: ${field(t, "plan_type_name")}\n`;
-      text += `  - Active: ${field(t, "is_active")}\n\n`;
-    }
-    return { content: [{ type: "text" as const, text }] };
-  });
+  server.tool(
+    "sitebay_list_teams",
+    "List all teams for the authenticated user",
+    {},
+    { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    async () => {
+      const data = await apiRequest(apiKey, "GET", "/team");
+      const teams = getResults(data);
+      if (!teams.length) return { content: [{ type: "text" as const, text: "No teams found." }] };
+      let text = `**Your Teams** (${teams.length}):\n\n`;
+      for (const t of teams as Record<string, unknown>[]) {
+        text += `• **${field(t, "name")}**\n`;
+        text += `  - ID: ${field(t, "id")}\n`;
+        text += `  - Plan: ${field(t, "plan_type_name")}\n`;
+        text += `  - Active: ${field(t, "is_active")}\n\n`;
+      }
+      return { content: [{ type: "text" as const, text }] };
+    },
+  );
 
-  server.tool("sitebay_list_ready_made_sites", "List available ready-made site templates", {}, async () => {
-    const data = await apiRequest(apiKey, "GET", "/ready_made_site");
-    const items = getResults(data);
-    if (!items.length) return { content: [{ type: "text" as const, text: "No ready-made sites available." }] };
-    let text = `**Ready-made Sites** (${items.length}):\n\n`;
-    for (const i of items as Record<string, unknown>[]) {
-      text += `• **${field(i, "name")}** — ${field(i, "description", "")}\n`;
-    }
-    return { content: [{ type: "text" as const, text }] };
-  });
+  server.tool(
+    "sitebay_list_ready_made_sites",
+    "List available ready-made site templates",
+    {},
+    { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    async () => {
+      const data = await apiRequest(apiKey, "GET", "/ready_made_site");
+      const items = getResults(data);
+      if (!items.length) return { content: [{ type: "text" as const, text: "No ready-made sites available." }] };
+      let text = `**Ready-made Sites** (${items.length}):\n\n`;
+      for (const i of items as Record<string, unknown>[]) {
+        text += `• **${field(i, "name")}** — ${field(i, "description", "")}\n`;
+      }
+      return { content: [{ type: "text" as const, text }] };
+    },
+  );
 
   server.tool(
     "sitebay_wordpress_proxy",
@@ -283,6 +367,7 @@ function registerTools(server: McpServer, apiKey: string) {
       query_params_json: z.string().optional().describe("JSON payload or query params"),
       method: z.enum(["get", "post", "put", "delete"]).default("get").describe("HTTP method"),
     },
+    { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
     async ({ fqdn, path, query_params_json, method }) => {
       const body: Record<string, unknown> = { fqdn, method, path };
       if (query_params_json) body.query_params_json = query_params_json;
@@ -298,8 +383,9 @@ function registerTools(server: McpServer, apiKey: string) {
       shop_name: z.string().describe("Shopify shop name"),
       path: z.string().default("/admin/api/2024-04").describe("Shopify API path"),
       query_params_json: z.string().optional().describe("JSON payload"),
-      method: z.enum(["get", "post", "put", "delete"]).default("get"),
+      method: z.enum(["get", "post", "put", "delete"]).default("get").describe("HTTP method"),
     },
+    { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
     async ({ shop_name, path, query_params_json, method }) => {
       const body: Record<string, unknown> = { shop_name, method, path };
       if (query_params_json) body.query_params_json = query_params_json;
@@ -314,8 +400,9 @@ function registerTools(server: McpServer, apiKey: string) {
     {
       path: z.string().describe("PostHog API path"),
       query_params_json: z.string().optional().describe("JSON payload"),
-      method: z.enum(["get", "post", "put", "delete"]).default("get"),
+      method: z.enum(["get", "post", "put", "delete"]).default("get").describe("HTTP method"),
     },
+    { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
     async ({ path, query_params_json, method }) => {
       const body: Record<string, unknown> = { path, method };
       if (query_params_json) body.query_params_json = query_params_json;
@@ -331,6 +418,7 @@ function registerTools(server: McpServer, apiKey: string) {
       fqdn: z.string().describe("Site domain"),
       number_to_fetch: z.number().int().default(1).describe("Number of backups to fetch"),
     },
+    { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     async ({ fqdn, number_to_fetch }) => {
       const data = await apiRequest(apiKey, "GET", `/site/${fqdn}/pit_restore/commits`, undefined, {
         number_to_fetch: String(number_to_fetch),
@@ -357,6 +445,7 @@ function registerTools(server: McpServer, apiKey: string) {
       dolt_restore_hash: z.string().optional().describe("Dolt hash for DB restore"),
       is_dry_run: z.boolean().optional().describe("Simulate without applying"),
     },
+    { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
     async ({ fqdn, ...opts }) => {
       const body: Record<string, unknown> = {};
       for (const [k, v] of Object.entries(opts)) {
@@ -367,16 +456,22 @@ function registerTools(server: McpServer, apiKey: string) {
     },
   );
 
-  server.tool("sitebay_account_affiliates", "Get affiliate referral information", {}, async () => {
-    const data = await apiRequest(apiKey, "GET", "/account/referred_user");
-    const affiliates = getResults(data);
-    if (!affiliates.length) return { content: [{ type: "text" as const, text: "No affiliate referrals." }] };
-    let text = `**Affiliate Referrals** (${affiliates.length}):\n\n`;
-    for (const a of affiliates as Record<string, unknown>[]) {
-      text += `• ${field(a, "email")} — ${field(a, "full_name")} (${field(a, "created_at")})\n`;
-    }
-    return { content: [{ type: "text" as const, text }] };
-  });
+  server.tool(
+    "sitebay_account_affiliates",
+    "Get affiliate referral information",
+    {},
+    { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    async () => {
+      const data = await apiRequest(apiKey, "GET", "/account/referred_user");
+      const affiliates = getResults(data);
+      if (!affiliates.length) return { content: [{ type: "text" as const, text: "No affiliate referrals." }] };
+      let text = `**Affiliate Referrals** (${affiliates.length}):\n\n`;
+      for (const a of affiliates as Record<string, unknown>[]) {
+        text += `• ${field(a, "email")} — ${field(a, "full_name")} (${field(a, "created_at")})\n`;
+      }
+      return { content: [{ type: "text" as const, text }] };
+    },
+  );
 
   server.tool(
     "sitebay_account_create_checkout",
@@ -386,6 +481,7 @@ function registerTools(server: McpServer, apiKey: string) {
       interval: z.enum(["month", "year"]).default("month").describe("Billing interval"),
       team_id: z.string().optional().describe("Team ID to purchase for"),
     },
+    { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
     async ({ plan_name, interval, team_id }) => {
       const body: Record<string, unknown> = { plan_name, interval };
       if (team_id) body.for_team_id = team_id;
@@ -404,22 +500,19 @@ type Env = {
 };
 
 export class SiteBayMCP extends McpAgent<Env> {
-  server = new McpServer({
-    name: "SiteBay WordPress Hosting",
-    version: "0.1.0",
-  });
+  server = new McpServer(SERVER_INFO);
 
   async init() {
     const url = new URL(this.request?.url ?? "http://localhost");
     const apiKey = url.searchParams.get("apiKey") ?? "";
-    registerTools(this.server, apiKey);
+    registerCapabilities(this.server, apiKey);
   }
 }
 
 const mcpHandler = SiteBayMCP.serve("/mcp");
 
 const SERVER_CARD = {
-  serverInfo: { name: "SiteBay WordPress Hosting", version: "0.1.0" },
+  serverInfo: SERVER_INFO,
   authentication: { required: true, schemes: ["bearer"] },
   tools: [
     { name: "sitebay_list_sites", description: "List all WordPress sites for the authenticated user", inputSchema: { type: "object", properties: { team_id: { type: "string", description: "Optional team ID to filter sites" } } } },
@@ -439,8 +532,14 @@ const SERVER_CARD = {
     { name: "sitebay_account_affiliates", description: "Get affiliate referral information", inputSchema: { type: "object", properties: {} } },
     { name: "sitebay_account_create_checkout", description: "Create a Stripe checkout session for team billing", inputSchema: { type: "object", properties: { plan_name: { type: "string" }, interval: { type: "string" } } } },
   ],
-  resources: [],
-  prompts: [],
+  resources: [
+    { uri: "sitebay://sites", name: "sites", description: "List of all WordPress sites for the authenticated user", mimeType: "application/json" },
+    { uri: "sitebay://teams", name: "teams", description: "List of all teams for the authenticated user", mimeType: "application/json" },
+  ],
+  prompts: [
+    { name: "manage-site", description: "Get guidance on managing a specific WordPress site", arguments: [{ name: "fqdn", description: "Site domain to manage", required: true }] },
+    { name: "setup-new-site", description: "Walk through creating a new WordPress site on SiteBay" },
+  ],
 };
 
 export default {
@@ -458,11 +557,8 @@ export default {
 // --- Smithery compatibility ---
 
 export function createServer({ config }: { config: Config }) {
-  const server = new McpServer({
-    name: "SiteBay WordPress Hosting",
-    version: "0.1.0",
-  });
-  registerTools(server, config.apiKey);
+  const server = new McpServer(SERVER_INFO);
+  registerCapabilities(server, config.apiKey);
   return server.server;
 }
 
