@@ -2,12 +2,12 @@
     "openapi": "3.1.0",
     "info": {
         "title": "SiteBay",
-        "description": "SiteBay API",
-        "version": "0.1.0"
+        "description": "Manage WordPress sites on SiteBay: create and delete sites, manage files, run WP-CLI shell commands, manage DNS, interact with the WordPress REST API via wp-proxy, manage Shopify stores via shopify-proxy, and query analytics via posthog-proxy.",
+        "version": "1.0.0"
     },
     "servers": [
         {
-            "url": "http://mydev.dev.sitebay.org"
+            "url": "https://my.sitebay.org"
         }
     ],
     "paths": {
@@ -65,8 +65,8 @@
                 "tags": [
                     "utils"
                 ],
-                "summary": "Proxy To Shopify Site",
-                "description": "Proxies requests to a myshopify admin API. MCP Enabled.",
+                "summary": "Shopify Admin API proxy",
+                "description": "Proxies requests to a myshopify admin API. Use this to manage Shopify products, orders, themes, and other resources on a connected store. MCP Enabled.",
                 "operationId": "proxy_to_shopify_site",
                 "requestBody": {
                     "content": {
@@ -80,7 +80,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Successful Response",
+                        "description": "JSON response from the Shopify Admin API",
                         "content": {
                             "application/json": {
                                 "schema": {}
@@ -110,8 +110,8 @@
                 "tags": [
                     "utils"
                 ],
-                "summary": "Proxy To Wp Site",
-                "description": "Proxies requests to a WordPress JSON API. MCP Enabled.",
+                "summary": "WordPress REST API proxy",
+                "description": "Proxies requests to the WordPress REST API (wp-json/wp/v2) for a site you own. Use this to create/read/update/delete posts, pages, media, users, and other WordPress resources. Authentication is handled automatically. MCP Enabled.",
                 "operationId": "proxy_to_wp_site",
                 "requestBody": {
                     "content": {
@@ -125,7 +125,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Successful Response",
+                        "description": "JSON response from the WordPress REST API",
                         "content": {
                             "application/json": {
                                 "schema": {}
@@ -155,8 +155,8 @@
                 "tags": [
                     "utils"
                 ],
-                "summary": "Proxy To Posthog",
-                "description": "Proxies POST requests to our PostHog API. MCP Enabled.",
+                "summary": "PostHog analytics API proxy",
+                "description": "Proxies requests to the PostHog analytics API for a team you belong to. Use this to query insights, list events, manage dashboards, and access site analytics. The path must include a project ID (e.g. /api/projects/6/insights). MCP Enabled.",
                 "operationId": "proxy_to_posthog",
                 "requestBody": {
                     "content": {
@@ -170,7 +170,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Successful Response",
+                        "description": "JSON response from the PostHog API",
                         "content": {
                             "application/json": {
                                 "schema": {}
@@ -772,6 +772,58 @@
                 }
             }
         },
+        "/f/api/v1/site/{fqdn}/git": {
+            "delete": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Unlink git repository",
+                "description": "Unlink the git repository from this site. MCP Enabled.",
+                "operationId": "unlink_git",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "title": "Response Unlink Git F Api V1 Site  Fqdn  Git Delete"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/f/api/v1/site/{fqdn}/cmd": {
             "post": {
                 "tags": [
@@ -859,6 +911,112 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/app__schemas__site_stage__SiteStage"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Create staging site",
+                "description": "Create a staging site. MCP Enabled.",
+                "operationId": "create_staging_site",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SiteStageCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/app__schemas__site_stage__SiteStage"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Delete staging site",
+                "description": "Delete a staging site. MCP Enabled.",
+                "operationId": "delete_staging_site",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "title": "Response Delete Staging Site F Api V1 Site  Fqdn  Stage Delete"
                                 }
                             }
                         }
@@ -970,144 +1128,28 @@
                 ],
                 "title": "AffiliatePayout"
             },
-            "AgentConfigResponse": {
-                "properties": {
-                    "github_copilot_key": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Github Copilot Key"
-                    },
-                    "default_provider": {
-                        "type": "string",
-                        "title": "Default Provider",
-                        "default": "copilot"
-                    },
-                    "user_overrides": {
-                        "anyOf": [
-                            {
-                                "additionalProperties": true,
-                                "type": "object"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "User Overrides"
-                    }
-                },
-                "type": "object",
-                "title": "AgentConfigResponse",
-                "description": "Agent configuration for Claude Code / OpenCode credentials."
-            },
-            "AgentConfigUpdate": {
-                "properties": {
-                    "github_copilot_key": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Github Copilot Key"
-                    },
-                    "default_provider": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Default Provider"
-                    }
-                },
-                "type": "object",
-                "title": "AgentConfigUpdate",
-                "description": "Update agent configuration."
-            },
-            "ApplicationPasswordCreate": {
-                "properties": {
-                    "fqdn": {
-                        "type": "string",
-                        "title": "Fqdn"
-                    },
-                    "username": {
-                        "type": "string",
-                        "title": "Username"
-                    },
-                    "password": {
-                        "type": "string",
-                        "title": "Password"
-                    },
-                    "team_id": {
-                        "type": "string",
-                        "format": "uuid4",
-                        "title": "Team Id"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "fqdn",
-                    "username",
-                    "password",
-                    "team_id"
-                ],
-                "title": "ApplicationPasswordCreate"
-            },
-            "ApplicationPasswordUpdate": {
-                "properties": {
-                    "fqdn": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Fqdn"
-                    },
-                    "username": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Username"
-                    },
-                    "password": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Password"
-                    }
-                },
-                "type": "object",
-                "title": "ApplicationPasswordUpdate"
-            },
             "BackupEntry": {
                 "properties": {
                     "id": {
                         "type": "string",
                         "format": "uuid4",
                         "title": "Id"
+                    },
+                    "site_live_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "uuid4"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Site Live Id"
+                    },
+                    "is_init_commit": {
+                        "type": "boolean",
+                        "title": "Is Init Commit"
                     },
                     "tables_saved": {
                         "items": {
@@ -1134,6 +1176,17 @@
                         "type": "array",
                         "title": "Tables Skipped"
                     },
+                    "failed_reason": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Failed Reason"
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
@@ -1150,34 +1203,46 @@
                             }
                         ],
                         "title": "Finished At"
+                    },
+                    "s3_snapshot_at": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "S3 Snapshot At"
+                    },
+                    "last_verified_at": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Last Verified At"
+                    },
+                    "verification_failed": {
+                        "type": "boolean",
+                        "title": "Verification Failed"
                     }
                 },
                 "type": "object",
                 "required": [
                     "id",
+                    "is_init_commit",
                     "tables_saved",
                     "tables_skipped",
-                    "created_at"
+                    "created_at",
+                    "verification_failed"
                 ],
                 "title": "BackupEntry"
-            },
-            "BearerResponse": {
-                "properties": {
-                    "access_token": {
-                        "type": "string",
-                        "title": "Access Token"
-                    },
-                    "token_type": {
-                        "type": "string",
-                        "title": "Token Type"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "access_token",
-                    "token_type"
-                ],
-                "title": "BearerResponse"
             },
             "BillingInterval": {
                 "type": "string",
@@ -1186,257 +1251,6 @@
                     "year"
                 ],
                 "title": "BillingInterval"
-            },
-            "Body_auth_bearer_login_f_api_v1_jwt_login_post": {
-                "properties": {
-                    "grant_type": {
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "pattern": "^password$"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Grant Type"
-                    },
-                    "username": {
-                        "type": "string",
-                        "title": "Username"
-                    },
-                    "password": {
-                        "type": "string",
-                        "format": "password",
-                        "title": "Password"
-                    },
-                    "scope": {
-                        "type": "string",
-                        "title": "Scope",
-                        "default": ""
-                    },
-                    "client_id": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Client Id"
-                    },
-                    "client_secret": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "format": "password",
-                        "title": "Client Secret"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "username",
-                    "password"
-                ],
-                "title": "Body_auth_bearer_login_f_api_v1_jwt_login_post"
-            },
-            "Body_auth_cookie_login_f_api_v1_auth_login_post": {
-                "properties": {
-                    "grant_type": {
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "pattern": "^password$"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Grant Type"
-                    },
-                    "username": {
-                        "type": "string",
-                        "title": "Username"
-                    },
-                    "password": {
-                        "type": "string",
-                        "format": "password",
-                        "title": "Password"
-                    },
-                    "scope": {
-                        "type": "string",
-                        "title": "Scope",
-                        "default": ""
-                    },
-                    "client_id": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Client Id"
-                    },
-                    "client_secret": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "format": "password",
-                        "title": "Client Secret"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "username",
-                    "password"
-                ],
-                "title": "Body_auth_cookie_login_f_api_v1_auth_login_post"
-            },
-            "Body_get_download_urls_f_api_v1_site__fqdn__get_download_urls_post": {
-                "properties": {
-                    "keys": {
-                        "items": {
-                            "type": "string"
-                        },
-                        "type": "array",
-                        "title": "Keys",
-                        "examples": [
-                            [
-                                "/wp-content/themes/twentytwentythree/readme.txt"
-                            ]
-                        ]
-                    },
-                    "version_ids": {
-                        "items": {
-                            "anyOf": [
-                                {
-                                    "type": "string"
-                                },
-                                {
-                                    "type": "null"
-                                }
-                            ]
-                        },
-                        "type": "array",
-                        "title": "Version Ids",
-                        "examples": [
-                            [
-                                "version_id_1",
-                                "version_id_2"
-                            ]
-                        ]
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "keys"
-                ],
-                "title": "Body_get_download_urls_f_api_v1_site__fqdn__get_download_urls_post"
-            },
-            "Body_grafana_token_f_api_v1_grafana_token_post": {
-                "properties": {
-                    "grant_type": {
-                        "type": "string",
-                        "title": "Grant Type"
-                    },
-                    "code": {
-                        "type": "string",
-                        "title": "Code"
-                    },
-                    "redirect_uri": {
-                        "type": "string",
-                        "title": "Redirect Uri"
-                    },
-                    "client_id": {
-                        "type": "string",
-                        "title": "Client Id"
-                    },
-                    "client_secret": {
-                        "type": "string",
-                        "title": "Client Secret"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "grant_type",
-                    "code",
-                    "redirect_uri",
-                    "client_id",
-                    "client_secret"
-                ],
-                "title": "Body_grafana_token_f_api_v1_grafana_token_post"
-            },
-            "Body_reset_forgot_password_f_api_v1_auth_forgot_password_post": {
-                "properties": {
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "title": "Email"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "email"
-                ],
-                "title": "Body_reset_forgot_password_f_api_v1_auth_forgot_password_post"
-            },
-            "Body_reset_reset_password_f_api_v1_auth_reset_password_post": {
-                "properties": {
-                    "token": {
-                        "type": "string",
-                        "title": "Token"
-                    },
-                    "password": {
-                        "type": "string",
-                        "title": "Password"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "token",
-                    "password"
-                ],
-                "title": "Body_reset_reset_password_f_api_v1_auth_reset_password_post"
-            },
-            "Body_verify_request_token_f_api_v1_auth_request_verify_token_post": {
-                "properties": {
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "title": "Email"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "email"
-                ],
-                "title": "Body_verify_request_token_f_api_v1_auth_request_verify_token_post"
-            },
-            "Body_verify_verify_f_api_v1_auth_verify_post": {
-                "properties": {
-                    "token": {
-                        "type": "string",
-                        "title": "Token"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "token"
-                ],
-                "title": "Body_verify_verify_f_api_v1_auth_verify_post"
             },
             "CheckoutSessionRequest": {
                 "properties": {
@@ -1461,125 +1275,6 @@
                     "for_team_id"
                 ],
                 "title": "CheckoutSessionRequest"
-            },
-            "DeleteAccountRequest": {
-                "properties": {
-                    "email": {
-                        "type": "string",
-                        "title": "Email"
-                    },
-                    "password": {
-                        "type": "string",
-                        "title": "Password"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "email",
-                    "password"
-                ],
-                "title": "DeleteAccountRequest"
-            },
-            "ErrorModel": {
-                "properties": {
-                    "detail": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "additionalProperties": {
-                                    "type": "string"
-                                },
-                                "type": "object"
-                            }
-                        ],
-                        "title": "Detail"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "detail"
-                ],
-                "title": "ErrorModel"
-            },
-            "ExternalPath": {
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "format": "uuid4",
-                        "title": "Id"
-                    },
-                    "external_name": {
-                        "type": "string",
-                        "title": "External Name"
-                    },
-                    "path": {
-                        "type": "string",
-                        "title": "Path"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "title": "Created At"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "external_name",
-                    "path",
-                    "created_at"
-                ],
-                "title": "ExternalPath"
-            },
-            "ExternalPathCreate": {
-                "properties": {
-                    "external_name": {
-                        "type": "string",
-                        "title": "External Name",
-                        "examples": [
-                            "subtle-klepon-d99e07.netlify.app"
-                        ]
-                    },
-                    "path": {
-                        "type": "string",
-                        "title": "Path",
-                        "examples": [
-                            "/support"
-                        ]
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "external_name",
-                    "path"
-                ],
-                "title": "ExternalPathCreate"
-            },
-            "ExternalPathUpdate": {
-                "properties": {
-                    "external_name": {
-                        "type": "string",
-                        "title": "External Name",
-                        "examples": [
-                            "subtle-klepon-d99e07.netlify.app"
-                        ]
-                    },
-                    "path": {
-                        "type": "string",
-                        "title": "Path",
-                        "examples": [
-                            "/support"
-                        ]
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "external_name",
-                    "path"
-                ],
-                "title": "ExternalPathUpdate"
             },
             "FileEdit": {
                 "properties": {
@@ -1612,51 +1307,6 @@
                 },
                 "type": "object",
                 "title": "HTTPValidationError"
-            },
-            "HappyBootstrapRequest": {
-                "properties": {
-                    "team_id": {
-                        "type": "string",
-                        "format": "uuid4",
-                        "title": "Team Id"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "team_id"
-                ],
-                "title": "HappyBootstrapRequest"
-            },
-            "HappyBootstrapResponse": {
-                "properties": {
-                    "secret": {
-                        "type": "string",
-                        "title": "Secret"
-                    },
-                    "happyServerUrl": {
-                        "type": "string",
-                        "title": "Happyserverurl"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "secret",
-                    "happyServerUrl"
-                ],
-                "title": "HappyBootstrapResponse"
-            },
-            "OAuth2AuthorizeResponse": {
-                "properties": {
-                    "authorization_url": {
-                        "type": "string",
-                        "title": "Authorization Url"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "authorization_url"
-                ],
-                "title": "OAuth2AuthorizeResponse"
             },
             "PITRestore": {
                 "properties": {
@@ -1904,63 +1554,6 @@
                 "type": "object",
                 "title": "PITRestoreCreate"
             },
-            "Page_ExternalPath_": {
-                "properties": {
-                    "limit": {
-                        "type": "integer",
-                        "minimum": 1.0,
-                        "title": "Limit"
-                    },
-                    "offset": {
-                        "type": "integer",
-                        "minimum": 0.0,
-                        "title": "Offset"
-                    },
-                    "count": {
-                        "type": "integer",
-                        "title": "Count"
-                    },
-                    "results": {
-                        "items": {
-                            "$ref": "#/components/schemas/ExternalPath"
-                        },
-                        "type": "array",
-                        "title": "Results"
-                    },
-                    "next": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Next"
-                    },
-                    "previous": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Previous"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "limit",
-                    "offset",
-                    "count",
-                    "results",
-                    "next",
-                    "previous"
-                ],
-                "title": "Page[ExternalPath]"
-            },
             "Page_PITRestore_": {
                 "properties": {
                     "limit": {
@@ -2075,63 +1668,6 @@
                 ],
                 "title": "Page[ReadyMadeSite]"
             },
-            "Page_ShopifyStore_": {
-                "properties": {
-                    "limit": {
-                        "type": "integer",
-                        "minimum": 1.0,
-                        "title": "Limit"
-                    },
-                    "offset": {
-                        "type": "integer",
-                        "minimum": 0.0,
-                        "title": "Offset"
-                    },
-                    "count": {
-                        "type": "integer",
-                        "title": "Count"
-                    },
-                    "results": {
-                        "items": {
-                            "$ref": "#/components/schemas/ShopifyStore"
-                        },
-                        "type": "array",
-                        "title": "Results"
-                    },
-                    "next": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Next"
-                    },
-                    "previous": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Previous"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "limit",
-                    "offset",
-                    "count",
-                    "results",
-                    "next",
-                    "previous"
-                ],
-                "title": "Page[ShopifyStore]"
-            },
             "Page_SiteLive_": {
                 "properties": {
                     "limit": {
@@ -2188,120 +1724,6 @@
                     "previous"
                 ],
                 "title": "Page[SiteLive]"
-            },
-            "Page_TeamMemberInvite_": {
-                "properties": {
-                    "limit": {
-                        "type": "integer",
-                        "minimum": 1.0,
-                        "title": "Limit"
-                    },
-                    "offset": {
-                        "type": "integer",
-                        "minimum": 0.0,
-                        "title": "Offset"
-                    },
-                    "count": {
-                        "type": "integer",
-                        "title": "Count"
-                    },
-                    "results": {
-                        "items": {
-                            "$ref": "#/components/schemas/TeamMemberInvite"
-                        },
-                        "type": "array",
-                        "title": "Results"
-                    },
-                    "next": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Next"
-                    },
-                    "previous": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Previous"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "limit",
-                    "offset",
-                    "count",
-                    "results",
-                    "next",
-                    "previous"
-                ],
-                "title": "Page[TeamMemberInvite]"
-            },
-            "Page_TeamMember_": {
-                "properties": {
-                    "limit": {
-                        "type": "integer",
-                        "minimum": 1.0,
-                        "title": "Limit"
-                    },
-                    "offset": {
-                        "type": "integer",
-                        "minimum": 0.0,
-                        "title": "Offset"
-                    },
-                    "count": {
-                        "type": "integer",
-                        "title": "Count"
-                    },
-                    "results": {
-                        "items": {
-                            "$ref": "#/components/schemas/TeamMember"
-                        },
-                        "type": "array",
-                        "title": "Results"
-                    },
-                    "next": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Next"
-                    },
-                    "previous": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Previous"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "limit",
-                    "offset",
-                    "count",
-                    "results",
-                    "next",
-                    "previous"
-                ],
-                "title": "Page[TeamMember]"
             },
             "Page_Team_": {
                 "properties": {
@@ -2360,120 +1782,6 @@
                 ],
                 "title": "Page[Team]"
             },
-            "Page_TicketReply_": {
-                "properties": {
-                    "limit": {
-                        "type": "integer",
-                        "minimum": 1.0,
-                        "title": "Limit"
-                    },
-                    "offset": {
-                        "type": "integer",
-                        "minimum": 0.0,
-                        "title": "Offset"
-                    },
-                    "count": {
-                        "type": "integer",
-                        "title": "Count"
-                    },
-                    "results": {
-                        "items": {
-                            "$ref": "#/components/schemas/TicketReply"
-                        },
-                        "type": "array",
-                        "title": "Results"
-                    },
-                    "next": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Next"
-                    },
-                    "previous": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Previous"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "limit",
-                    "offset",
-                    "count",
-                    "results",
-                    "next",
-                    "previous"
-                ],
-                "title": "Page[TicketReply]"
-            },
-            "Page_Ticket_": {
-                "properties": {
-                    "limit": {
-                        "type": "integer",
-                        "minimum": 1.0,
-                        "title": "Limit"
-                    },
-                    "offset": {
-                        "type": "integer",
-                        "minimum": 0.0,
-                        "title": "Offset"
-                    },
-                    "count": {
-                        "type": "integer",
-                        "title": "Count"
-                    },
-                    "results": {
-                        "items": {
-                            "$ref": "#/components/schemas/Ticket"
-                        },
-                        "type": "array",
-                        "title": "Results"
-                    },
-                    "next": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Next"
-                    },
-                    "previous": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Previous"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "limit",
-                    "offset",
-                    "count",
-                    "results",
-                    "next",
-                    "previous"
-                ],
-                "title": "Page[Ticket]"
-            },
             "Page_UserAffiliate_": {
                 "properties": {
                     "limit": {
@@ -2530,63 +1838,6 @@
                     "previous"
                 ],
                 "title": "Page[UserAffiliate]"
-            },
-            "Page_UserEvent_": {
-                "properties": {
-                    "limit": {
-                        "type": "integer",
-                        "minimum": 1.0,
-                        "title": "Limit"
-                    },
-                    "offset": {
-                        "type": "integer",
-                        "minimum": 0.0,
-                        "title": "Offset"
-                    },
-                    "count": {
-                        "type": "integer",
-                        "title": "Count"
-                    },
-                    "results": {
-                        "items": {
-                            "$ref": "#/components/schemas/UserEvent"
-                        },
-                        "type": "array",
-                        "title": "Results"
-                    },
-                    "next": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Next"
-                    },
-                    "previous": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Previous"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "limit",
-                    "offset",
-                    "count",
-                    "results",
-                    "next",
-                    "previous"
-                ],
-                "title": "Page[UserEvent]"
             },
             "PlanName": {
                 "type": "string",
@@ -2835,158 +2086,6 @@
                 ],
                 "title": "ReadyMadeSite"
             },
-            "ReadyMadeSiteCreate": {
-                "properties": {
-                    "description": {
-                        "type": "string",
-                        "title": "Description"
-                    },
-                    "theme": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Theme"
-                    },
-                    "fqdn": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Fqdn"
-                    },
-                    "url": {
-                        "type": "string",
-                        "title": "Url"
-                    },
-                    "tag": {
-                        "type": "string",
-                        "title": "Tag"
-                    },
-                    "is_public": {
-                        "type": "boolean",
-                        "title": "Is Public"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "description",
-                    "url",
-                    "tag",
-                    "is_public"
-                ],
-                "title": "ReadyMadeSiteCreate"
-            },
-            "ReadyMadeSiteUpdate": {
-                "properties": {
-                    "tag": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Tag"
-                    },
-                    "is_public": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Is Public"
-                    },
-                    "description": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Description"
-                    },
-                    "url": {
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "maxLength": 2083,
-                                "minLength": 1,
-                                "format": "uri"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Url"
-                    }
-                },
-                "type": "object",
-                "title": "ReadyMadeSiteUpdate"
-            },
-            "Region": {
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "title": "Id"
-                    },
-                    "name": {
-                        "type": "string",
-                        "title": "Name"
-                    },
-                    "city": {
-                        "type": "string",
-                        "title": "City"
-                    },
-                    "country": {
-                        "type": "string",
-                        "title": "Country"
-                    },
-                    "cname": {
-                        "type": "string",
-                        "title": "Cname"
-                    },
-                    "country_code": {
-                        "type": "string",
-                        "title": "Country Code"
-                    },
-                    "ip": {
-                        "type": "string",
-                        "title": "Ip"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "title": "Created At"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "name",
-                    "city",
-                    "country",
-                    "cname",
-                    "country_code",
-                    "ip",
-                    "created_at"
-                ],
-                "title": "Region"
-            },
             "RequestMethod": {
                 "type": "string",
                 "enum": [
@@ -3064,97 +2163,6 @@
                         "shop_name": "my-shop"
                     }
                 ]
-            },
-            "ShopifyStore": {
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "title": "Id"
-                    },
-                    "shop_url": {
-                        "type": "string",
-                        "title": "Shop Url"
-                    },
-                    "blog_url": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Blog Url"
-                    },
-                    "site_live": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/SiteLive"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
-                    "inject_header": {
-                        "type": "boolean",
-                        "title": "Inject Header"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "title": "Created At"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "shop_url",
-                    "inject_header",
-                    "created_at"
-                ],
-                "title": "ShopifyStore"
-            },
-            "ShopifyStoreUpdate": {
-                "properties": {
-                    "blog_url": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Blog Url"
-                    },
-                    "site_live_id": {
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "format": "uuid4"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Site Live Id"
-                    },
-                    "inject_header": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Inject Header",
-                        "default": true
-                    }
-                },
-                "type": "object",
-                "title": "ShopifyStoreUpdate"
             },
             "SiteLive": {
                 "properties": {
@@ -3403,6 +2411,7 @@
                     },
                     "wordpress_email": {
                         "type": "string",
+                        "format": "email",
                         "title": "Wordpress Email",
                         "examples": [
                             "admin@example.org"
@@ -3546,29 +2555,6 @@
                 "type": "object",
                 "title": "SiteLiveUpdate"
             },
-            "SitePathResponse": {
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "title": "Id"
-                    },
-                    "fqdn": {
-                        "type": "string",
-                        "title": "Fqdn"
-                    },
-                    "volume_path": {
-                        "type": "string",
-                        "title": "Volume Path"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "fqdn",
-                    "volume_path"
-                ],
-                "title": "SitePathResponse"
-            },
             "SiteStageCreate": {
                 "properties": {
                     "subdomain": {
@@ -3590,7 +2576,7 @@
                         ],
                         "title": "Restore Point",
                         "examples": [
-                            "2026-02-14T01:10:50.895075Z"
+                            "2026-03-02T08:16:02.598516Z"
                         ]
                     },
                     "git_staging_branch": {
@@ -3851,453 +2837,6 @@
                 ],
                 "title": "Team"
             },
-            "TeamMember": {
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "format": "uuid4",
-                        "title": "Id"
-                    },
-                    "user_id": {
-                        "type": "string",
-                        "format": "uuid4",
-                        "title": "User Id"
-                    },
-                    "team_id": {
-                        "type": "string",
-                        "format": "uuid4",
-                        "title": "Team Id"
-                    },
-                    "level": {
-                        "type": "integer",
-                        "title": "Level"
-                    },
-                    "role": {
-                        "type": "string",
-                        "title": "Role"
-                    },
-                    "joined_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "title": "Joined At"
-                    },
-                    "user": {
-                        "$ref": "#/components/schemas/UserLimited"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "user_id",
-                    "team_id",
-                    "level",
-                    "role",
-                    "joined_at",
-                    "user"
-                ],
-                "title": "TeamMember"
-            },
-            "TeamMemberInvite": {
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "format": "uuid4",
-                        "title": "Id"
-                    },
-                    "first_name": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "First Name"
-                    },
-                    "target_email": {
-                        "type": "string",
-                        "title": "Target Email"
-                    },
-                    "role": {
-                        "type": "string",
-                        "title": "Role"
-                    },
-                    "expiry": {
-                        "type": "string",
-                        "format": "date-time",
-                        "title": "Expiry"
-                    },
-                    "link": {
-                        "type": "string",
-                        "title": "Link"
-                    },
-                    "created_by": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/UserLimited"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "title": "Created At"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "target_email",
-                    "role",
-                    "expiry",
-                    "link",
-                    "created_at"
-                ],
-                "title": "TeamMemberInvite"
-            },
-            "TeamMemberInviteCreate": {
-                "properties": {
-                    "target_email": {
-                        "type": "string",
-                        "title": "Target Email"
-                    },
-                    "first_name": {
-                        "type": "string",
-                        "title": "First Name"
-                    },
-                    "message": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Message"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "target_email",
-                    "first_name"
-                ],
-                "title": "TeamMemberInviteCreate"
-            },
-            "TeamUpdate": {
-                "properties": {
-                    "name": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Name"
-                    },
-                    "timezone": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Timezone"
-                    }
-                },
-                "type": "object",
-                "title": "TeamUpdate"
-            },
-            "Ticket": {
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "format": "uuid4",
-                        "title": "Id"
-                    },
-                    "team_id": {
-                        "type": "string",
-                        "format": "uuid4",
-                        "title": "Team Id"
-                    },
-                    "category": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Category"
-                    },
-                    "subject": {
-                        "type": "string",
-                        "title": "Subject"
-                    },
-                    "description": {
-                        "type": "string",
-                        "title": "Description"
-                    },
-                    "resolved": {
-                        "type": "boolean",
-                        "title": "Resolved"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "title": "Created At"
-                    },
-                    "resolved_at": {
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "format": "date-time"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Resolved At"
-                    },
-                    "ticket_replies": {
-                        "items": {
-                            "$ref": "#/components/schemas/TicketReply"
-                        },
-                        "type": "array",
-                        "title": "Ticket Replies"
-                    },
-                    "is_openai_thread": {
-                        "type": "boolean",
-                        "title": "Is Openai Thread"
-                    },
-                    "messages_remaining": {
-                        "type": "integer",
-                        "title": "Messages Remaining"
-                    },
-                    "openai_custom_instructions": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Openai Custom Instructions"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "team_id",
-                    "subject",
-                    "description",
-                    "resolved",
-                    "created_at",
-                    "ticket_replies",
-                    "is_openai_thread",
-                    "messages_remaining"
-                ],
-                "title": "Ticket"
-            },
-            "TicketCreate": {
-                "properties": {
-                    "site_live_id": {
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "format": "uuid4"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Site Live Id"
-                    },
-                    "team_id": {
-                        "type": "string",
-                        "format": "uuid4",
-                        "title": "Team Id"
-                    },
-                    "subject": {
-                        "type": "string",
-                        "title": "Subject"
-                    },
-                    "category": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Category"
-                    },
-                    "description": {
-                        "type": "string",
-                        "title": "Description"
-                    },
-                    "resolved": {
-                        "type": "boolean",
-                        "title": "Resolved",
-                        "default": false
-                    },
-                    "s3_object": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "S3 Object"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "team_id",
-                    "subject",
-                    "description"
-                ],
-                "title": "TicketCreate"
-            },
-            "TicketReply": {
-                "properties": {
-                    "resolve": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Resolve"
-                    },
-                    "description": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Description"
-                    },
-                    "id": {
-                        "type": "string",
-                        "format": "uuid4",
-                        "title": "Id"
-                    },
-                    "openai_message_id": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Openai Message Id"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "title": "Created At"
-                    },
-                    "user": {
-                        "$ref": "#/components/schemas/UserLimited"
-                    },
-                    "is_gpt_chat_message": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Is Gpt Chat Message"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "created_at",
-                    "user",
-                    "is_gpt_chat_message"
-                ],
-                "title": "TicketReply"
-            },
-            "TicketReplyCreate": {
-                "properties": {
-                    "resolve": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Resolve"
-                    },
-                    "description": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Description"
-                    },
-                    "is_gpt_chat_message": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Is Gpt Chat Message",
-                        "default": false
-                    }
-                },
-                "type": "object",
-                "title": "TicketReplyCreate"
-            },
-            "TicketUpdate": {
-                "properties": {
-                    "openai_custom_instructions": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Openai Custom Instructions"
-                    }
-                },
-                "type": "object",
-                "title": "TicketUpdate"
-            },
             "UserAffiliate": {
                 "properties": {
                     "id": {
@@ -4384,12 +2923,7 @@
                     },
                     "affiliate_payouts": {
                         "items": {
-                            "anyOf": [
-                                {
-                                    "$ref": "#/components/schemas/AffiliatePayout"
-                                },
-                                {}
-                            ]
+                            "$ref": "#/components/schemas/AffiliatePayout"
                         },
                         "type": "array",
                         "title": "Affiliate Payouts",
@@ -4408,328 +2942,6 @@
                     "posthog_user_id"
                 ],
                 "title": "UserAffiliate"
-            },
-            "UserAgentCredentials": {
-                "properties": {
-                    "anthropic": {
-                        "anyOf": [
-                            {
-                                "additionalProperties": true,
-                                "type": "object"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Anthropic"
-                    },
-                    "openai": {
-                        "anyOf": [
-                            {
-                                "additionalProperties": true,
-                                "type": "object"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Openai"
-                    }
-                },
-                "type": "object",
-                "title": "UserAgentCredentials",
-                "description": "User-specific agent credentials."
-            },
-            "UserCreate": {
-                "properties": {
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "title": "Email"
-                    },
-                    "password": {
-                        "type": "string",
-                        "title": "Password"
-                    },
-                    "is_active": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Is Active",
-                        "default": true
-                    },
-                    "is_superuser": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Is Superuser",
-                        "default": false
-                    },
-                    "is_verified": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Is Verified",
-                        "default": false
-                    },
-                    "full_name": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Full Name"
-                    },
-                    "phone_number": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Phone Number"
-                    },
-                    "address": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Address"
-                    },
-                    "address2": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Address2"
-                    },
-                    "country": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Country"
-                    },
-                    "state": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "State"
-                    },
-                    "city": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "City"
-                    },
-                    "post_code": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Post Code"
-                    },
-                    "initial_team_name": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Initial Team Name",
-                        "default": "Default Team"
-                    },
-                    "referral_source": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Referral Source"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "email",
-                    "password"
-                ],
-                "title": "UserCreate"
-            },
-            "UserEvent": {
-                "properties": {
-                    "site_live_id": {
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "format": "uuid4"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Site Live Id"
-                    },
-                    "event_type": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Event Type"
-                    },
-                    "fqdn": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Fqdn"
-                    },
-                    "scope": {
-                        "type": "string",
-                        "title": "Scope",
-                        "default": "Site"
-                    },
-                    "item_id": {
-                        "type": "integer",
-                        "title": "Item Id",
-                        "default": 1
-                    },
-                    "activity": {
-                        "type": "string",
-                        "title": "Activity"
-                    },
-                    "id": {
-                        "type": "string",
-                        "format": "uuid4",
-                        "title": "Id"
-                    },
-                    "detail": {
-                        "additionalProperties": true,
-                        "type": "object",
-                        "title": "Detail"
-                    },
-                    "unread": {
-                        "type": "boolean",
-                        "title": "Unread",
-                        "default": false
-                    },
-                    "description": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Description"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "title": "Created At"
-                    },
-                    "finished_at": {
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "format": "date-time"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Finished At"
-                    },
-                    "user_id": {
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "format": "uuid4"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "User Id"
-                    },
-                    "user": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/UserLimited"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "activity",
-                    "id",
-                    "detail",
-                    "created_at"
-                ],
-                "title": "UserEvent"
             },
             "UserLimited": {
                 "properties": {
@@ -4818,503 +3030,6 @@
                 ],
                 "title": "UserLimited"
             },
-            "UserRead": {
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "format": "uuid4",
-                        "title": "Id"
-                    },
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "title": "Email"
-                    },
-                    "is_active": {
-                        "type": "boolean",
-                        "title": "Is Active",
-                        "default": true
-                    },
-                    "is_superuser": {
-                        "type": "boolean",
-                        "title": "Is Superuser",
-                        "default": false
-                    },
-                    "is_verified": {
-                        "type": "boolean",
-                        "title": "Is Verified",
-                        "default": false
-                    },
-                    "posthog_user_id": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Posthog User Id"
-                    },
-                    "full_name": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Full Name"
-                    },
-                    "first_name": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "First Name"
-                    },
-                    "default_region_id": {
-                        "type": "integer",
-                        "title": "Default Region Id"
-                    },
-                    "phone_number": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Phone Number"
-                    },
-                    "tfa": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Tfa"
-                    },
-                    "signed_up_with": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Signed Up With"
-                    },
-                    "address": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Address"
-                    },
-                    "address2": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Address2"
-                    },
-                    "country": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Country"
-                    },
-                    "state": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "State"
-                    },
-                    "city": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "City"
-                    },
-                    "post_code": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Post Code"
-                    },
-                    "github_user": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Github User"
-                    },
-                    "gitlab_user": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Gitlab User"
-                    },
-                    "bitbucket_user": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Bitbucket User"
-                    },
-                    "bitbucket_token": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Bitbucket Token"
-                    },
-                    "bitbucket_workspace": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Bitbucket Workspace"
-                    },
-                    "balance": {
-                        "type": "integer",
-                        "title": "Balance"
-                    },
-                    "currency": {
-                        "type": "string",
-                        "title": "Currency"
-                    },
-                    "ref_code": {
-                        "type": "string",
-                        "title": "Ref Code"
-                    },
-                    "used_trial": {
-                        "type": "boolean",
-                        "title": "Used Trial"
-                    },
-                    "has_password": {
-                        "type": "boolean",
-                        "title": "Has Password"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "id",
-                    "email",
-                    "posthog_user_id",
-                    "full_name",
-                    "first_name",
-                    "default_region_id",
-                    "phone_number",
-                    "tfa",
-                    "signed_up_with",
-                    "address",
-                    "address2",
-                    "country",
-                    "state",
-                    "city",
-                    "post_code",
-                    "github_user",
-                    "gitlab_user",
-                    "bitbucket_user",
-                    "bitbucket_token",
-                    "bitbucket_workspace",
-                    "balance",
-                    "currency",
-                    "ref_code",
-                    "used_trial",
-                    "has_password"
-                ],
-                "title": "UserRead"
-            },
-            "UserUpdate": {
-                "properties": {
-                    "password": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Password"
-                    },
-                    "email": {
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "format": "email"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Email"
-                    },
-                    "is_active": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Is Active"
-                    },
-                    "is_superuser": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Is Superuser"
-                    },
-                    "is_verified": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Is Verified"
-                    },
-                    "full_name": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Full Name"
-                    },
-                    "default_region_id": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Default Region Id"
-                    },
-                    "phone_number": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Phone Number"
-                    },
-                    "tfa": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Tfa"
-                    },
-                    "tfa_code": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Tfa Code"
-                    },
-                    "address": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Address"
-                    },
-                    "address2": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Address2"
-                    },
-                    "country": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Country"
-                    },
-                    "state": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "State"
-                    },
-                    "city": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "City"
-                    },
-                    "post_code": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Post Code"
-                    },
-                    "bitbucket_user": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Bitbucket User"
-                    },
-                    "bitbucket_token": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Bitbucket Token"
-                    },
-                    "bitbucket_workspace": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Bitbucket Workspace"
-                    },
-                    "active_coupon_id": {
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "format": "uuid4"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Active Coupon Id"
-                    }
-                },
-                "type": "object",
-                "title": "UserUpdate"
-            },
             "ValidationError": {
                 "properties": {
                     "loc": {
@@ -5395,76 +3110,6 @@
                         "query_params_json": "{\"title\":\"Meet Spot: A Lovable Pup\",\"content\":\"Spot is an adorable, energetic dog who loves to play fetch and run in the park. Every day is an adventure with Spot, from chasing butterflies to exploring new trails. His bright eyes and wagging tail bring joy to everyone he meets.\"}"
                     }
                 ]
-            },
-            "app__models__site__ApplicationPassword": {
-                "properties": {
-                    "id": {
-                        "type": "string",
-                        "format": "uuid",
-                        "title": "Id"
-                    },
-                    "fqdn": {
-                        "type": "string",
-                        "title": "Fqdn"
-                    },
-                    "user_id": {
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "format": "uuid"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "User Id"
-                    },
-                    "team_id": {
-                        "anyOf": [
-                            {
-                                "type": "string",
-                                "format": "uuid"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Team Id"
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "title": "Created At"
-                    },
-                    "username": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Username"
-                    },
-                    "password": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Password"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "fqdn",
-                    "created_at"
-                ],
-                "title": "ApplicationPassword"
             },
             "app__models__site__SiteStage": {
                 "properties": {
@@ -5568,24 +3213,6 @@
                     "git_last_synced_at"
                 ],
                 "title": "SiteStage"
-            },
-            "app__schemas__application_password__ApplicationPassword": {
-                "properties": {
-                    "fqdn": {
-                        "type": "string",
-                        "title": "Fqdn"
-                    },
-                    "username": {
-                        "type": "string",
-                        "title": "Username"
-                    }
-                },
-                "type": "object",
-                "required": [
-                    "fqdn",
-                    "username"
-                ],
-                "title": "ApplicationPassword"
             },
             "app__schemas__site_stage__SiteStage": {
                 "properties": {
