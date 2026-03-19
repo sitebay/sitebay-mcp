@@ -107,6 +107,11 @@ _MCP_NAMES = {
     "proxy_to_shopify_site": "shopify_proxy",
     "proxy_to_posthog": "posthog_proxy",
     "get_referred_users": "get_affiliates",
+    "create_checkpoint": "create_checkpoint",
+    "list_checkpoints": "list_checkpoints",
+    "get_checkpoint": "get_checkpoint",
+    "restore_checkpoint": "restore_checkpoint",
+    "delete_checkpoint": "delete_checkpoint",
 }
 
 _token = os.getenv("SITEBAY_API_TOKEN", "")
@@ -217,6 +222,10 @@ _SOFT_404_FALLBACKS = {
     "sitebay_get_pit_restore": _fallback_none,
     # Treat get_site 404 as "not found" -> return null (keeps callers simple)
     "sitebay_get_site": _fallback_none,
+    # Checkpoint may not exist -> null
+    "sitebay_get_checkpoint": _fallback_none,
+    # Checkpoints list may be empty -> []
+    "sitebay_list_checkpoints": _fallback_empty_list,
 }
 
 

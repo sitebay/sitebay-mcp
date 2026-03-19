@@ -11,10 +11,197 @@
         }
     ],
     "paths": {
+        "/f/api/v1/account/shopify_store/{id}": {
+            "patch": {
+                "tags": [
+                    "account"
+                ],
+                "summary": "Update a shopify store",
+                "description": "Update a store's details. MCP Enabled.",
+                "operationId": "update_shopify_store",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ShopifyStoreUpdate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Your store's details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShopifyStore"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "account"
+                ],
+                "summary": "Get Shopify Store",
+                "description": "Get Linked Shopify Store. MCP Enabled.",
+                "operationId": "shopify_store",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JSON",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ShopifyStore"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/account/shopify_store": {
+            "get": {
+                "tags": [
+                    "account"
+                ],
+                "summary": "Get Shopify Stores",
+                "description": "Get stores you have connected to your user account from Shopify Link. MCP Enabled.",
+                "operationId": "shopify_stores",
+                "responses": {
+                    "200": {
+                        "description": "JSON",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Page_ShopifyStore_"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ]
+            }
+        },
+        "/f/api/v1/account/referred_user": {
+            "get": {
+                "tags": [
+                    "account"
+                ],
+                "summary": "Get affiliate referrals",
+                "description": "Retrieve data about users who have signed up using your links. MCP Enabled.",
+                "operationId": "get_referred_users",
+                "responses": {
+                    "200": {
+                        "description": "A list of affiliates",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Page_UserAffiliate_"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ]
+            }
+        },
+        "/f/api/v1/account/git_repos": {
+            "get": {
+                "tags": [
+                    "account"
+                ],
+                "summary": "Get linked git repositories",
+                "description": "Get the data for your linked GitHub/GitLab/Bitbucket repositories. MCP Enabled.",
+                "operationId": "get_linked_git_repos_for_user",
+                "responses": {
+                    "200": {
+                        "description": "Details of your linked GitHub/GitLab/Bitbucket repositories",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "additionalProperties": true,
+                                    "type": "object",
+                                    "title": "Response Get Linked Git Repos For User F Api V1 Account Git Repos Get"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ]
+            }
+        },
         "/f/api/v1/create_checkout_session": {
             "post": {
                 "tags": [
-                    "utils"
+                    "billing"
                 ],
                 "summary": "Buy a team through stripe checkout",
                 "description": "Generate a stripe checkout URL. MCP Enabled.",
@@ -63,7 +250,7 @@
         "/f/api/v1/shopify-proxy": {
             "post": {
                 "tags": [
-                    "utils"
+                    "proxy"
                 ],
                 "summary": "Shopify Admin API proxy",
                 "description": "Proxies requests to a myshopify admin API. Use this to manage Shopify products, orders, themes, and other resources on a connected store. MCP Enabled.",
@@ -108,7 +295,7 @@
         "/f/api/v1/wp-proxy": {
             "post": {
                 "tags": [
-                    "utils"
+                    "proxy"
                 ],
                 "summary": "WordPress REST API proxy",
                 "description": "Proxies requests to the WordPress REST API (wp-json/wp/v2) for a site you own. Use this to create/read/update/delete posts, pages, media, users, and other WordPress resources. Authentication is handled automatically. MCP Enabled.",
@@ -153,7 +340,7 @@
         "/f/api/v1/posthog-proxy": {
             "post": {
                 "tags": [
-                    "utils"
+                    "proxy"
                 ],
                 "summary": "PostHog analytics API proxy",
                 "description": "Proxies requests to the PostHog analytics API for a team you belong to. Use this to query insights, list events, manage dashboards, and access site analytics. The path must include a project ID (e.g. /api/projects/6/insights). MCP Enabled.",
@@ -195,22 +382,65 @@
                 ]
             }
         },
-        "/f/api/v1/account/referred_user": {
-            "get": {
+        "/f/api/v1/grafana-proxy": {
+            "post": {
                 "tags": [
-                    "account"
+                    "proxy"
                 ],
-                "summary": "Get affiliate referrals",
-                "description": "Retrieve data about users who have signed up using your links. MCP Enabled.",
-                "operationId": "get_referred_users",
+                "summary": "Grafana API proxy",
+                "description": "Proxies requests to the Grafana API for a team you belong to. Use this to query dashboards, datasources, and Loki log data. MCP Enabled.",
+                "operationId": "proxy_to_grafana",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GrafanaProxyParams"
+                            }
+                        }
+                    },
+                    "required": true
+                },
                 "responses": {
                     "200": {
-                        "description": "A list of affiliates",
+                        "description": "JSON response from the Grafana API",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Page_UserAffiliate_"
+                                    "$ref": "#/components/schemas/HTTPValidationError"
                                 }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ]
+            }
+        },
+        "/f/api/v1/get_git_sync_repos": {
+            "get": {
+                "tags": [
+                    "git"
+                ],
+                "summary": "Verify Git Sync Directories",
+                "description": "Returns your account's linked Git Repos. MCP Enabled.",
+                "operationId": "get_git_sync_repos",
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
                             }
                         }
                     }
@@ -543,6 +773,141 @@
                 }
             }
         },
+        "/f/api/v1/site/{fqdn}/pit_restore/files": {
+            "get": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "PIT Files",
+                "description": "Get a list of wp-content files at a point in time. MCP Enabled.",
+                "operationId": "get_files_at_point",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    },
+                    {
+                        "name": "restore_point",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time",
+                            "title": "Restore Point"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "JSON",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/get_download_urls": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Get download URLs",
+                "description": "Generate signed download URLs for specific backup files. MCP Enabled.",
+                "operationId": "get_download_urls",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    },
+                    {
+                        "name": "at_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string",
+                                    "format": "date-time"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "At Date"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Body_get_download_urls_f_api_v1_site__fqdn__get_download_urls_post"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "title": "Response Get Download Urls F Api V1 Site  Fqdn  Get Download Urls Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/f/api/v1/site/{fqdn}/pit_restore": {
             "get": {
                 "tags": [
@@ -713,6 +1078,1053 @@
                 }
             }
         },
+        "/f/api/v1/site/{fqdn}/pit_restore/preview": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Preview PIT Restore",
+                "description": "Preview what would be restored without actually restoring. MCP Enabled.",
+                "operationId": "preview_restore_site",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PITRestoreCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "PIT Restore preview details",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PITRestore"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/browser/goto": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Navigate browser to a path on the site",
+                "description": "Navigate the site's browser context to a given path. Auto-logs in on first use. MCP Enabled.",
+                "operationId": "browser_goto",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BrowserGotoRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/browser/screenshot": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Take a screenshot of the site",
+                "description": "Returns a base64-encoded PNG screenshot of the current page. MCP Enabled.",
+                "operationId": "browser_screenshot",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BrowserScreenshotRequest",
+                                "default": {
+                                    "full_page": false
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/browser/click": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Click an element on the site",
+                "description": "Click an element by CSS selector in the site's browser context. MCP Enabled.",
+                "operationId": "browser_click",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BrowserClickRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/browser/fill": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Fill a form field on the site",
+                "description": "Fill a form field by CSS selector. MCP Enabled.",
+                "operationId": "browser_fill",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BrowserFillRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/browser/eval": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Run JavaScript on the site",
+                "description": "Execute JavaScript in the site's browser context and return the result. MCP Enabled.",
+                "operationId": "browser_eval",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BrowserEvalRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/browser/text": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Get text content of an element",
+                "description": "Get visible text content of a CSS-selected element (default: body). MCP Enabled.",
+                "operationId": "browser_text",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BrowserTextRequest",
+                                "default": {
+                                    "selector": "body"
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/browser/admin-cookie": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Generate a WordPress admin auth cookie for the site",
+                "description": "Generates a short-lived WordPress admin authentication cookie via WP-CLI. Returns { name, value, domain } so the agent can inject it into a headless browser context to access /wp-admin/ pages without going through the login flow. MCP Enabled.",
+                "operationId": "browser_admin_cookie",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/dns": {
+            "get": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Get DNS records",
+                "description": "Get DNS records for nameserver configured sites. MCP Enabled.",
+                "operationId": "get_dns_records",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    },
+                                    "title": "Response Get Dns Records F Api V1 Site  Fqdn  Dns Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Create DNS record",
+                "description": "Create Cloudflare DNS record. MCP Enabled.",
+                "operationId": "create_dns_record",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    },
+                    {
+                        "name": "dns_name",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Dns Name"
+                        }
+                    },
+                    {
+                        "name": "dns_content",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Dns Content"
+                        }
+                    },
+                    {
+                        "name": "dns_type",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Dns Type"
+                        }
+                    },
+                    {
+                        "name": "proxied",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false,
+                            "title": "Proxied"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Create Dns Record F Api V1 Site  Fqdn  Dns Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/dns/{dns_id}": {
+            "delete": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Delete DNS record",
+                "description": "Delete DNS record. MCP Enabled.",
+                "operationId": "delete_dns_record",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "dns_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Dns Id"
+                        }
+                    },
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "title": "Response Delete Dns Record F Api V1 Site  Fqdn  Dns  Dns Id  Delete"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/external_path": {
+            "get": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Get external paths",
+                "description": "Get all external paths for site. MCP Enabled.",
+                "operationId": "get_external_paths",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Page_ExternalPath_"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Create external path",
+                "description": "Create external path. MCP Enabled.",
+                "operationId": "create_external_path",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExternalPathCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExternalPath"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/wpfile/read": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Read a WordPress file",
+                "description": "Read file contents from wp-content/. Supports line ranges. MCP Enabled.",
+                "operationId": "read_file",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FileReadRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Read File F Api V1 Site  Fqdn  Wpfile Read Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/wpfile/edit": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Edit a WordPress file",
+                "description": "Edit a file using search/replace blocks. Supports dry_run to preview diff. MCP Enabled.",
+                "operationId": "edit_file",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FileEditRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Edit File F Api V1 Site  Fqdn  Wpfile Edit Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/wpfile/read_and_edit": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Read then edit a WordPress file",
+                "description": "Atomically read a file and apply edits. Returns the original content alongside the edit result. Supports dry_run. MCP Enabled.",
+                "operationId": "read_and_edit_file",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReadAndEditRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Read And Edit File F Api V1 Site  Fqdn  Wpfile Read And Edit Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/wpfile/tree": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "List wp-content file tree",
+                "description": "Get a directory tree of wp-content/ with file sizes. MCP Enabled.",
+                "operationId": "file_tree",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FileTreeRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response File Tree F Api V1 Site  Fqdn  Wpfile Tree Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/wpfile/multi_edit": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Edit multiple files atomically",
+                "description": "Apply search/replace edits to multiple files in one request. All-or-nothing: if any edit fails, all changes are rolled back. Supports dry_run. MCP Enabled.",
+                "operationId": "multi_edit_files",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MultiEditRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Multi Edit Files F Api V1 Site  Fqdn  Wpfile Multi Edit Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/f/api/v1/site/{fqdn}/wpfile_diff_edit": {
             "post": {
                 "tags": [
@@ -824,6 +2236,201 @@
                 }
             }
         },
+        "/f/api/v1/site/{fqdn}/logs/{container_name}": {
+            "get": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Get container logs",
+                "description": "Get container logs for debugging. MCP Enabled.",
+                "operationId": "get_container_logs",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "container_name",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Container Name"
+                        }
+                    },
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    },
+                    {
+                        "name": "lines",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Number of log lines to retrieve",
+                            "default": 100,
+                            "title": "Lines"
+                        },
+                        "description": "Number of log lines to retrieve"
+                    },
+                    {
+                        "name": "since",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Timestamp to retrieve logs since",
+                            "title": "Since"
+                        },
+                        "description": "Timestamp to retrieve logs since"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Get Container Logs F Api V1 Site  Fqdn  Logs  Container Name  Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/logs": {
+            "get": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Get site logs",
+                "description": "Get WordPress/git-sync logs. MCP Enabled.",
+                "operationId": "get_site_logs",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    },
+                    {
+                        "name": "log_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "description": "Type of logs to retrieve",
+                            "default": "wordpress",
+                            "title": "Log Type"
+                        },
+                        "description": "Type of logs to retrieve"
+                    },
+                    {
+                        "name": "lines",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Number of log lines to retrieve",
+                            "default": 100,
+                            "title": "Lines"
+                        },
+                        "description": "Number of log lines to retrieve"
+                    },
+                    {
+                        "name": "level",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Log level filter (error, warning, info, debug)",
+                            "title": "Level"
+                        },
+                        "description": "Log level filter (error, warning, info, debug)"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Get Site Logs F Api V1 Site  Fqdn  Logs Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/f/api/v1/site/{fqdn}/cmd": {
             "post": {
                 "tags": [
@@ -864,6 +2471,446 @@
                         "content": {
                             "application/json": {
                                 "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/tools": {
+            "get": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Get Cloudflare tools",
+                "description": "Get Cloudflare tools info and current zone settings. MCP Enabled.",
+                "operationId": "get_cloudflare_tools",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/cf_settings": {
+            "patch": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Update Cloudflare zone settings",
+                "description": "Toggle one or more Cloudflare performance/security settings. MCP Enabled.",
+                "operationId": "update_cf_settings",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CfSettingsPatch"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Update Cf Settings F Api V1 Site  Fqdn  Cf Settings Patch"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/clear_cache": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Purge Cloudflare CDN cache",
+                "description": "Purge all cached content for the site. MCP Enabled.",
+                "operationId": "clear_cache",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "title": "Response Clear Cache F Api V1 Site  Fqdn  Clear Cache Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/ns_status": {
+            "get": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Check nameserver propagation",
+                "description": "Re-verify whether the domain's nameservers point to SiteBay. Used by the NS setup wizard to poll for propagation. MCP Enabled.",
+                "operationId": "check_ns_status",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Check Ns Status F Api V1 Site  Fqdn  Ns Status Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/waf_login_protection": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Toggle WAF login protection",
+                "description": "Enable or disable rate-limiting on /wp-login.php to prevent brute-force attacks. MCP Enabled.",
+                "operationId": "toggle_waf_login_protection",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/WafToggle"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Toggle Waf Login Protection F Api V1 Site  Fqdn  Waf Login Protection Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/custom_hostname": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Add custom hostname",
+                "description": "Attach a custom domain (e.g. shop.theirclient.com) to this site via Cloudflare for SaaS. MCP Enabled.",
+                "operationId": "add_custom_hostname",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomHostnameCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Add Custom Hostname F Api V1 Site  Fqdn  Custom Hostname Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "List custom hostnames",
+                "description": "List all custom hostnames attached to this site with DCV/SSL status. MCP Enabled.",
+                "operationId": "list_site_custom_hostnames",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    },
+                                    "title": "Response List Site Custom Hostnames F Api V1 Site  Fqdn  Custom Hostname Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/custom_hostname/{hostname_id}": {
+            "delete": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Remove custom hostname",
+                "description": "Remove a custom hostname from this site. MCP Enabled.",
+                "operationId": "remove_custom_hostname",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "hostname_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Hostname Id"
+                        }
+                    },
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    },
+                                    "title": "Response Remove Custom Hostname F Api V1 Site  Fqdn  Custom Hostname  Hostname Id  Delete"
+                                }
                             }
                         }
                     },
@@ -1034,6 +3081,542 @@
                 }
             }
         },
+        "/f/api/v1/site/{fqdn}/checkpoints": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Create a checkpoint",
+                "description": "Create a named checkpoint with an auto-captured screenshot. MCP Enabled.",
+                "operationId": "create_checkpoint",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SiteCheckpointCreate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SiteCheckpoint"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "List checkpoints",
+                "description": "List all checkpoints for a site, newest first. MCP Enabled.",
+                "operationId": "list_checkpoints",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/SiteCheckpoint"
+                                    },
+                                    "title": "Response List Checkpoints F Api V1 Site  Fqdn  Checkpoints Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/checkpoints/{checkpoint_id}": {
+            "get": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Get a checkpoint",
+                "description": "Get details of a specific checkpoint. MCP Enabled.",
+                "operationId": "get_checkpoint",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "checkpoint_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid4",
+                            "title": "Checkpoint Id"
+                        }
+                    },
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SiteCheckpoint"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Delete a checkpoint",
+                "description": "Delete checkpoint metadata. The underlying backup is not affected. MCP Enabled.",
+                "operationId": "delete_checkpoint",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "checkpoint_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid4",
+                            "title": "Checkpoint Id"
+                        }
+                    },
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Delete Checkpoint F Api V1 Site  Fqdn  Checkpoints  Checkpoint Id  Delete"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/checkpoints/{checkpoint_id}/restore": {
+            "post": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Restore to checkpoint",
+                "description": "Restore the site to the state at this checkpoint using PIT restore. MCP Enabled.",
+                "operationId": "restore_checkpoint",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "checkpoint_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid4",
+                            "title": "Checkpoint Id"
+                        }
+                    },
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Restore Checkpoint F Api V1 Site  Fqdn  Checkpoints  Checkpoint Id  Restore Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/dolt/log": {
+            "get": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Dolt commit log",
+                "description": "Recent dolt commits for this site's database. Shows what tables changed and when. MCP Enabled.",
+                "operationId": "dolt_log",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "default": 20,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "additionalProperties": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "title": "Response Dolt Log F Api V1 Site  Fqdn  Dolt Log Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/dolt/diff": {
+            "get": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Dolt table diff",
+                "description": "Show what changed in the database between two commits. If only `from_commit` is given, diffs to HEAD. If neither is given, diffs the last commit vs HEAD (most recent changes). MCP Enabled.",
+                "operationId": "dolt_diff",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    },
+                    {
+                        "name": "from_commit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Start commit hash",
+                            "title": "From Commit"
+                        },
+                        "description": "Start commit hash"
+                    },
+                    {
+                        "name": "to_commit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "End commit hash (default: HEAD)",
+                            "title": "To Commit"
+                        },
+                        "description": "End commit hash (default: HEAD)"
+                    },
+                    {
+                        "name": "table",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Specific table to diff",
+                            "title": "Table"
+                        },
+                        "description": "Specific table to diff"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Dolt Diff F Api V1 Site  Fqdn  Dolt Diff Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/site/{fqdn}/dolt/diff-summary": {
+            "get": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Human-readable diff summary",
+                "description": "Returns a plain-English summary of what changed in the database. Ideal for the agent to speak back to the user before publishing. MCP Enabled.",
+                "operationId": "dolt_diff_summary",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    },
+                    {
+                        "name": "from_commit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "From Commit"
+                        }
+                    },
+                    {
+                        "name": "to_commit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "To Commit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Dolt Diff Summary F Api V1 Site  Fqdn  Dolt Diff Summary Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/f/api/v1/team": {
             "get": {
                 "tags": [
@@ -1059,6 +3642,285 @@
                         "OAuth2PasswordBearer": []
                     }
                 ]
+            }
+        },
+        "/f/api/v1/shopify/{shop_name}/theme/{theme_id}/asset": {
+            "get": {
+                "tags": [
+                    "shopify",
+                    "shopify"
+                ],
+                "summary": "Read a Shopify theme asset",
+                "description": "Read a Shopify theme asset by key. Returns normalized Shopify file body metadata. MCP Enabled.",
+                "operationId": "read_asset",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "shop_name",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Shop Name"
+                        }
+                    },
+                    {
+                        "name": "theme_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Theme Id"
+                        }
+                    },
+                    {
+                        "name": "key",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Key"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Read Asset F Api V1 Shopify  Shop Name  Theme  Theme Id  Asset Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/shopify/{shop_name}/theme/{theme_id}/asset/edit": {
+            "post": {
+                "tags": [
+                    "shopify",
+                    "shopify"
+                ],
+                "summary": "Edit a Shopify theme asset",
+                "description": "Edit a Shopify theme asset using WordPress-style search/replace blocks. Supports dry_run. MCP Enabled.",
+                "operationId": "edit_asset",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "shop_name",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Shop Name"
+                        }
+                    },
+                    {
+                        "name": "theme_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Theme Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssetEditRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Edit Asset F Api V1 Shopify  Shop Name  Theme  Theme Id  Asset Edit Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/shopify/{shop_name}/theme/{theme_id}/assets/multi_edit": {
+            "post": {
+                "tags": [
+                    "shopify",
+                    "shopify"
+                ],
+                "summary": "Edit multiple Shopify theme assets",
+                "description": "Edit multiple Shopify theme assets using WordPress-style search/replace blocks. Supports dry_run and rollback reporting. MCP Enabled.",
+                "operationId": "multi_edit_assets",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "shop_name",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Shop Name"
+                        }
+                    },
+                    {
+                        "name": "theme_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Theme Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MultiAssetEditRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Multi Edit Assets F Api V1 Shopify  Shop Name  Theme  Theme Id  Assets Multi Edit Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/f/api/v1/shopify/{shop_name}/theme/{theme_id}/duplicate": {
+            "post": {
+                "tags": [
+                    "shopify",
+                    "shopify"
+                ],
+                "summary": "Duplicate a Shopify theme",
+                "description": "Duplicate a Shopify theme to create a rollback checkpoint. MCP Enabled.",
+                "operationId": "duplicate_theme",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "shop_name",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Shop Name"
+                        }
+                    },
+                    {
+                        "name": "theme_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Theme Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DuplicateThemeRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Duplicate Theme F Api V1 Shopify  Shop Name  Theme  Theme Id  Duplicate Post"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/f/api/v1/ready_made_site": {
@@ -1127,6 +3989,52 @@
                     "team"
                 ],
                 "title": "AffiliatePayout"
+            },
+            "AssetEditRequest": {
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "title": "Key",
+                        "description": "Theme file key, e.g. sections/hero.liquid"
+                    },
+                    "file_edit_using_search_replace_blocks": {
+                        "type": "string",
+                        "title": "File Edit Using Search Replace Blocks",
+                        "description": "Search/replace blocks in <<<<<<< SEARCH / ======= / >>>>>>> REPLACE format"
+                    },
+                    "dry_run": {
+                        "type": "boolean",
+                        "title": "Dry Run",
+                        "description": "Preview diff without applying changes",
+                        "default": false
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "key",
+                    "file_edit_using_search_replace_blocks"
+                ],
+                "title": "AssetEditRequest"
+            },
+            "AssetMultiEdit": {
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "title": "Key",
+                        "description": "Theme file key, e.g. sections/hero.liquid"
+                    },
+                    "search_replace_blocks": {
+                        "type": "string",
+                        "title": "Search Replace Blocks",
+                        "description": "Search/replace blocks in <<<<<<< SEARCH / ======= / >>>>>>> REPLACE format"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "key",
+                    "search_replace_blocks"
+                ],
+                "title": "AssetMultiEdit"
             },
             "BackupEntry": {
                 "properties": {
@@ -1252,6 +4160,229 @@
                 ],
                 "title": "BillingInterval"
             },
+            "Body_get_download_urls_f_api_v1_site__fqdn__get_download_urls_post": {
+                "properties": {
+                    "keys": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Keys",
+                        "examples": [
+                            [
+                                "/wp-content/themes/twentytwentythree/readme.txt"
+                            ]
+                        ]
+                    },
+                    "version_ids": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Version Ids",
+                        "examples": [
+                            [
+                                "version_id_1",
+                                "version_id_2"
+                            ]
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "keys"
+                ],
+                "title": "Body_get_download_urls_f_api_v1_site__fqdn__get_download_urls_post"
+            },
+            "BrowserClickRequest": {
+                "properties": {
+                    "selector": {
+                        "type": "string",
+                        "title": "Selector"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "selector"
+                ],
+                "title": "BrowserClickRequest"
+            },
+            "BrowserEvalRequest": {
+                "properties": {
+                    "js": {
+                        "type": "string",
+                        "title": "Js"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "js"
+                ],
+                "title": "BrowserEvalRequest"
+            },
+            "BrowserFillRequest": {
+                "properties": {
+                    "selector": {
+                        "type": "string",
+                        "title": "Selector"
+                    },
+                    "value": {
+                        "type": "string",
+                        "title": "Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "selector",
+                    "value"
+                ],
+                "title": "BrowserFillRequest"
+            },
+            "BrowserGotoRequest": {
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "title": "Path",
+                        "default": "/"
+                    }
+                },
+                "type": "object",
+                "title": "BrowserGotoRequest"
+            },
+            "BrowserScreenshotRequest": {
+                "properties": {
+                    "full_page": {
+                        "type": "boolean",
+                        "title": "Full Page",
+                        "default": false
+                    }
+                },
+                "type": "object",
+                "title": "BrowserScreenshotRequest"
+            },
+            "BrowserTextRequest": {
+                "properties": {
+                    "selector": {
+                        "type": "string",
+                        "title": "Selector",
+                        "default": "body"
+                    }
+                },
+                "type": "object",
+                "title": "BrowserTextRequest"
+            },
+            "CfSettingsPatch": {
+                "properties": {
+                    "dev_mode": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Dev Mode"
+                    },
+                    "always_online": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Always Online"
+                    },
+                    "hotlink_protection": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Hotlink Protection"
+                    },
+                    "rocket_loader": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Rocket Loader"
+                    },
+                    "bot_fight_mode": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Bot Fight Mode"
+                    },
+                    "email_obfuscation": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Email Obfuscation"
+                    },
+                    "minify_html": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Minify Html"
+                    },
+                    "minify_css": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Minify Css"
+                    },
+                    "minify_js": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Minify Js"
+                    }
+                },
+                "type": "object",
+                "title": "CfSettingsPatch"
+            },
             "CheckoutSessionRequest": {
                 "properties": {
                     "plan_name": {
@@ -1276,6 +4407,87 @@
                 ],
                 "title": "CheckoutSessionRequest"
             },
+            "CustomHostnameCreate": {
+                "properties": {
+                    "hostname": {
+                        "type": "string",
+                        "title": "Hostname"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "hostname"
+                ],
+                "title": "CustomHostnameCreate"
+            },
+            "DuplicateThemeRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "Name for the duplicated checkpoint theme"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "title": "DuplicateThemeRequest"
+            },
+            "ExternalPath": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid4",
+                        "title": "Id"
+                    },
+                    "external_name": {
+                        "type": "string",
+                        "title": "External Name"
+                    },
+                    "path": {
+                        "type": "string",
+                        "title": "Path"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "external_name",
+                    "path",
+                    "created_at"
+                ],
+                "title": "ExternalPath"
+            },
+            "ExternalPathCreate": {
+                "properties": {
+                    "external_name": {
+                        "type": "string",
+                        "title": "External Name",
+                        "examples": [
+                            "subtle-klepon-d99e07.netlify.app"
+                        ]
+                    },
+                    "path": {
+                        "type": "string",
+                        "title": "Path",
+                        "examples": [
+                            "/support"
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "external_name",
+                    "path"
+                ],
+                "title": "ExternalPathCreate"
+            },
             "FileEdit": {
                 "properties": {
                     "file_path": {
@@ -1295,6 +4507,126 @@
                 ],
                 "title": "FileEdit"
             },
+            "FileEditRequest": {
+                "properties": {
+                    "file_path": {
+                        "type": "string",
+                        "title": "File Path",
+                        "description": "Path relative to wp-content/"
+                    },
+                    "file_edit_using_search_replace_blocks": {
+                        "type": "string",
+                        "title": "File Edit Using Search Replace Blocks",
+                        "description": "Search/replace blocks in <<<<<<< SEARCH / ======= / >>>>>>> REPLACE format"
+                    },
+                    "dry_run": {
+                        "type": "boolean",
+                        "title": "Dry Run",
+                        "description": "Preview diff without applying changes",
+                        "default": false
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "file_path",
+                    "file_edit_using_search_replace_blocks"
+                ],
+                "title": "FileEditRequest"
+            },
+            "FileReadRequest": {
+                "properties": {
+                    "file_path": {
+                        "type": "string",
+                        "title": "File Path",
+                        "description": "Path relative to wp-content/, e.g. themes/mytheme/functions.php"
+                    },
+                    "start_line": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Start Line",
+                        "description": "First line to return (1-indexed)"
+                    },
+                    "end_line": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "End Line",
+                        "description": "Last line to return (inclusive)"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "file_path"
+                ],
+                "title": "FileReadRequest"
+            },
+            "FileTreeRequest": {
+                "properties": {
+                    "path": {
+                        "type": "string",
+                        "title": "Path",
+                        "description": "Subdirectory relative to wp-content/ (empty = wp-content root)",
+                        "default": ""
+                    },
+                    "max_depth": {
+                        "type": "integer",
+                        "maximum": 10.0,
+                        "minimum": 1.0,
+                        "title": "Max Depth",
+                        "description": "Max directory depth to traverse",
+                        "default": 3
+                    }
+                },
+                "type": "object",
+                "title": "FileTreeRequest"
+            },
+            "GrafanaProxyParams": {
+                "properties": {
+                    "team_id": {
+                        "type": "string",
+                        "format": "uuid4",
+                        "title": "Team Id"
+                    },
+                    "path": {
+                        "type": "string",
+                        "title": "Path"
+                    },
+                    "method": {
+                        "$ref": "#/components/schemas/RequestMethod",
+                        "default": "get"
+                    },
+                    "query_params_json": {
+                        "type": "string",
+                        "title": "Query Params Json",
+                        "default": ""
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "team_id",
+                    "path"
+                ],
+                "title": "GrafanaProxyParams",
+                "examples": [
+                    {
+                        "method": "get",
+                        "path": "/api/datasources",
+                        "query_params_json": "",
+                        "team_id": "00000000-0000-0000-0000-000000000000"
+                    }
+                ]
+            },
             "HTTPValidationError": {
                 "properties": {
                     "detail": {
@@ -1307,6 +4639,69 @@
                 },
                 "type": "object",
                 "title": "HTTPValidationError"
+            },
+            "MultiAssetEditRequest": {
+                "properties": {
+                    "edits": {
+                        "items": {
+                            "$ref": "#/components/schemas/AssetMultiEdit"
+                        },
+                        "type": "array",
+                        "title": "Edits"
+                    },
+                    "dry_run": {
+                        "type": "boolean",
+                        "title": "Dry Run",
+                        "description": "Preview all diffs without applying",
+                        "default": false
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "edits"
+                ],
+                "title": "MultiAssetEditRequest"
+            },
+            "MultiEditRequest": {
+                "properties": {
+                    "edits": {
+                        "items": {
+                            "$ref": "#/components/schemas/MultiFileEdit"
+                        },
+                        "type": "array",
+                        "title": "Edits"
+                    },
+                    "dry_run": {
+                        "type": "boolean",
+                        "title": "Dry Run",
+                        "description": "Preview all diffs without applying",
+                        "default": false
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "edits"
+                ],
+                "title": "MultiEditRequest"
+            },
+            "MultiFileEdit": {
+                "properties": {
+                    "file_path": {
+                        "type": "string",
+                        "title": "File Path",
+                        "description": "Path relative to wp-content/"
+                    },
+                    "search_replace_blocks": {
+                        "type": "string",
+                        "title": "Search Replace Blocks"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "file_path",
+                    "search_replace_blocks"
+                ],
+                "title": "MultiFileEdit"
             },
             "PITRestore": {
                 "properties": {
@@ -1554,6 +4949,63 @@
                 "type": "object",
                 "title": "PITRestoreCreate"
             },
+            "Page_ExternalPath_": {
+                "properties": {
+                    "limit": {
+                        "type": "integer",
+                        "minimum": 1.0,
+                        "title": "Limit"
+                    },
+                    "offset": {
+                        "type": "integer",
+                        "minimum": 0.0,
+                        "title": "Offset"
+                    },
+                    "count": {
+                        "type": "integer",
+                        "title": "Count"
+                    },
+                    "results": {
+                        "items": {
+                            "$ref": "#/components/schemas/ExternalPath"
+                        },
+                        "type": "array",
+                        "title": "Results"
+                    },
+                    "next": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Next"
+                    },
+                    "previous": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Previous"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "limit",
+                    "offset",
+                    "count",
+                    "results",
+                    "next",
+                    "previous"
+                ],
+                "title": "Page[ExternalPath]"
+            },
             "Page_PITRestore_": {
                 "properties": {
                     "limit": {
@@ -1667,6 +5119,63 @@
                     "previous"
                 ],
                 "title": "Page[ReadyMadeSite]"
+            },
+            "Page_ShopifyStore_": {
+                "properties": {
+                    "limit": {
+                        "type": "integer",
+                        "minimum": 1.0,
+                        "title": "Limit"
+                    },
+                    "offset": {
+                        "type": "integer",
+                        "minimum": 0.0,
+                        "title": "Offset"
+                    },
+                    "count": {
+                        "type": "integer",
+                        "title": "Count"
+                    },
+                    "results": {
+                        "items": {
+                            "$ref": "#/components/schemas/ShopifyStore"
+                        },
+                        "type": "array",
+                        "title": "Results"
+                    },
+                    "next": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Next"
+                    },
+                    "previous": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Previous"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "limit",
+                    "offset",
+                    "count",
+                    "results",
+                    "next",
+                    "previous"
+                ],
+                "title": "Page[ShopifyStore]"
             },
             "Page_SiteLive_": {
                 "properties": {
@@ -1877,6 +5386,32 @@
                         "query_params_json": "{\"name\":\"Pageview count\",\"derived_name\":\"Pageview count\",\"description\":\"\",\"filters\":{\"insight\":\"TRENDS\",\"entity_type\":\"events\",\"events\":[{\"type\":\"events\",\"id\":\"$pageview\",\"order\":0,\"name\":\"$pageview\",\"math\":\"total\"}],\"interval\":\"day\",\"display\":\"ActionsLineGraph\"},\"query\":null,\"saved\":true,\"tags\":[]}"
                     }
                 ]
+            },
+            "ReadAndEditRequest": {
+                "properties": {
+                    "file_path": {
+                        "type": "string",
+                        "title": "File Path",
+                        "description": "Path relative to wp-content/"
+                    },
+                    "file_edit_using_search_replace_blocks": {
+                        "type": "string",
+                        "title": "File Edit Using Search Replace Blocks",
+                        "description": "Search/replace blocks in <<<<<<< SEARCH / ======= / >>>>>>> REPLACE format"
+                    },
+                    "dry_run": {
+                        "type": "boolean",
+                        "title": "Dry Run",
+                        "description": "Preview diff without applying changes",
+                        "default": false
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "file_path",
+                    "file_edit_using_search_replace_blocks"
+                ],
+                "title": "ReadAndEditRequest"
             },
             "ReadyMadeSite": {
                 "properties": {
@@ -2164,6 +5699,248 @@
                     }
                 ]
             },
+            "ShopifyStore": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "shop_url": {
+                        "type": "string",
+                        "title": "Shop Url"
+                    },
+                    "blog_url": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Blog Url"
+                    },
+                    "site_live": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/SiteLive"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "inject_header": {
+                        "type": "boolean",
+                        "title": "Inject Header"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "shop_url",
+                    "inject_header",
+                    "created_at"
+                ],
+                "title": "ShopifyStore"
+            },
+            "ShopifyStoreUpdate": {
+                "properties": {
+                    "blog_url": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Blog Url"
+                    },
+                    "site_live_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "uuid4"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Site Live Id"
+                    },
+                    "inject_header": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Inject Header",
+                        "default": true
+                    }
+                },
+                "type": "object",
+                "title": "ShopifyStoreUpdate"
+            },
+            "SiteCheckpoint": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid4",
+                        "title": "Id"
+                    },
+                    "site_live_id": {
+                        "type": "string",
+                        "format": "uuid4",
+                        "title": "Site Live Id"
+                    },
+                    "team_id": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "format": "uuid4"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Team Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "screenshot_url": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Screenshot Url"
+                    },
+                    "conversation_url": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Conversation Url"
+                    },
+                    "page_path": {
+                        "type": "string",
+                        "title": "Page Path",
+                        "default": "/"
+                    },
+                    "pit_timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Pit Timestamp"
+                    },
+                    "dolt_commit_hash": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Dolt Commit Hash"
+                    },
+                    "metadata_json": {
+                        "additionalProperties": true,
+                        "type": "object",
+                        "title": "Metadata Json",
+                        "default": {}
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Created At"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "site_live_id",
+                    "name",
+                    "pit_timestamp",
+                    "created_at"
+                ],
+                "title": "SiteCheckpoint"
+            },
+            "SiteCheckpointCreate": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "page_path": {
+                        "type": "string",
+                        "title": "Page Path",
+                        "default": "/"
+                    },
+                    "metadata_json": {
+                        "additionalProperties": true,
+                        "type": "object",
+                        "title": "Metadata Json",
+                        "default": {}
+                    },
+                    "conversation": {
+                        "anyOf": [
+                            {
+                                "additionalProperties": true,
+                                "type": "object"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Conversation"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name"
+                ],
+                "title": "SiteCheckpointCreate"
+            },
             "SiteLive": {
                 "properties": {
                     "id": {
@@ -2291,6 +6068,10 @@
                         "type": "string",
                         "title": "Http Auth Password"
                     },
+                    "favicon_url": {
+                        "type": "string",
+                        "title": "Favicon Url"
+                    },
                     "http_auth_enabled": {
                         "type": "boolean",
                         "title": "Http Auth Enabled"
@@ -2359,6 +6140,7 @@
                     "is_free",
                     "db_prefix",
                     "http_auth_password",
+                    "favicon_url",
                     "http_auth_enabled",
                     "is_sleeping",
                     "tenant_id",
@@ -2576,7 +6358,7 @@
                         ],
                         "title": "Restore Point",
                         "examples": [
-                            "2026-03-02T08:16:02.598516Z"
+                            "2026-03-18T23:59:53.375986Z"
                         ]
                     },
                     "git_staging_branch": {
@@ -3110,6 +6892,19 @@
                         "query_params_json": "{\"title\":\"Meet Spot: A Lovable Pup\",\"content\":\"Spot is an adorable, energetic dog who loves to play fetch and run in the park. Every day is an adventure with Spot, from chasing butterflies to exploring new trails. His bright eyes and wagging tail bring joy to everyone he meets.\"}"
                     }
                 ]
+            },
+            "WafToggle": {
+                "properties": {
+                    "enabled": {
+                        "type": "boolean",
+                        "title": "Enabled"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "enabled"
+                ],
+                "title": "WafToggle"
             },
             "app__models__site__SiteStage": {
                 "properties": {

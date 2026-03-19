@@ -5,6 +5,7 @@
   "module": "src/index.ts",
   "scripts": {
     "build": "npx @smithery/cli build",
+    "build:embeddings": "npx tsx scripts/build-embeddings.ts",
     "dev": "npx wrangler dev",
     "deploy": "npx wrangler deploy"
   },
