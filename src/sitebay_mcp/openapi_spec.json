@@ -3617,6 +3617,133 @@
                 }
             }
         },
+        "/f/api/v1/site/{fqdn}/dolt/history-search": {
+            "get": {
+                "tags": [
+                    "sites"
+                ],
+                "summary": "Search Dolt history",
+                "description": "Search retained Dolt history for a site using an on-demand cached index. MCP Enabled.",
+                "operationId": "dolt_history_search",
+                "security": [
+                    {
+                        "OAuth2PasswordBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "fqdn",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "title": "Fqdn"
+                        }
+                    },
+                    {
+                        "name": "query",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "minLength": 1,
+                            "title": "Query"
+                        },
+                        "description": "Search text"
+                    },
+                    {
+                        "name": "diff_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Optional filter: added, deleted, modified",
+                            "title": "Diff Type"
+                        },
+                        "description": "Optional filter: added, deleted, modified"
+                    },
+                    {
+                        "name": "date_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Inclusive start date in YYYY-MM-DD format",
+                            "title": "Date From"
+                        },
+                        "description": "Inclusive start date in YYYY-MM-DD format"
+                    },
+                    {
+                        "name": "date_to",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Inclusive end date in YYYY-MM-DD format",
+                            "title": "Date To"
+                        },
+                        "description": "Inclusive end date in YYYY-MM-DD format"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "default": 5,
+                            "title": "Limit"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": true,
+                                    "title": "Response Dolt History Search F Api V1 Site  Fqdn  Dolt History Search Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/f/api/v1/team": {
             "get": {
                 "tags": [

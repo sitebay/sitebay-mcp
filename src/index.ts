@@ -764,14 +764,17 @@ function registerCapabilities(server: McpServer, apiKey: string, env?: Env) {
 
   server.tool(
     "sitebay_browser_admin_cookie",
-    "Generate a WordPress admin auth cookie for the site. MCP Enabled.",
+    "Generate a Playwright-compatible cookie object for WordPress admin access on the site. MCP Enabled.",
     {
       fqdn: z.string().describe("Site domain"),
     },
     { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
     async ({ fqdn }) => {
-      const data = await apiRequest(apiKey, "POST", `/site/${fqdn}/browser/admin-cookie`, {});
-      return { content: [{ type: "text" as const, text: JSON.stringify(data) }] };
+      const data = (await apiRequest(apiKey, "POST", `/site/${fqdn}/browser/admin-cookie`, {})) as Record<string, unknown>;
+      return {
+        structuredContent: data,
+        content: [{ type: "text" as const, text: JSON.stringify(data) }],
+      };
     },
   );
 
@@ -1383,6 +1386,38 @@ function registerCapabilities(server: McpServer, apiKey: string, env?: Env) {
     },
   );
 
+  server.tool(
+    "sitebay_search_dolt_history",
+    "Search retained Dolt history for a site and return matching change events with cache freshness metadata.",
+    {
+      fqdn: z.string().describe("Site domain"),
+      query: z.string().describe("Search text"),
+      diff_type: z.string().optional().describe("Optional filter: added, deleted, modified"),
+      date_from: z.string().optional().describe("Inclusive start date in YYYY-MM-DD format"),
+      date_to: z.string().optional().describe("Inclusive end date in YYYY-MM-DD format"),
+      limit: z.number().int().min(1).max(100).optional().describe("Maximum number of results to return"),
+    },
+    { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    async ({ fqdn, query, diff_type, date_from, date_to, limit }) => {
+      const params: Record<string, string> = { query };
+      if (diff_type !== undefined) params.diff_type = diff_type;
+      if (date_from !== undefined) params.date_from = date_from;
+      if (date_to !== undefined) params.date_to = date_to;
+      if (limit !== undefined) params.limit = String(limit);
+      const result = (await apiRequest(
+        apiKey,
+        "GET",
+        `/site/${fqdn}/dolt/history-search`,
+        undefined,
+        params,
+      )) as Record<string, unknown>;
+      return {
+        structuredContent: result,
+        content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
+      };
+    },
+  );
+
   // --- Cloudflare / CDN / Security ---
 
   server.tool(
@@ -1694,6 +1729,7 @@ const SERVER_CARD = {
     { name: "sitebay_dolt_log", description: "Get recent Dolt commits for a site's database", inputSchema: { type: "object", properties: { fqdn: { type: "string" }, limit: { type: "number" } }, required: ["fqdn"] } },
     { name: "sitebay_dolt_diff", description: "Show what changed in the database between two Dolt commits", inputSchema: { type: "object", properties: { fqdn: { type: "string" }, from_commit: { type: "string" }, to_commit: { type: "string" }, table: { type: "string" } }, required: ["fqdn"] } },
     { name: "sitebay_dolt_diff_summary", description: "Get a human-readable summary of database changes between Dolt commits", inputSchema: { type: "object", properties: { fqdn: { type: "string" }, from_commit: { type: "string" }, to_commit: { type: "string" } }, required: ["fqdn"] } },
+    { name: "sitebay_search_dolt_history", description: "Search retained Dolt history for a site", inputSchema: { type: "object", properties: { fqdn: { type: "string" }, query: { type: "string" }, diff_type: { type: "string" }, date_from: { type: "string" }, date_to: { type: "string" }, limit: { type: "number" } }, required: ["fqdn", "query"] } },
     { name: "sitebay_get_cloudflare_tools", description: "Get Cloudflare tools info and current zone settings", inputSchema: { type: "object", properties: { fqdn: { type: "string" } }, required: ["fqdn"] } },
     { name: "sitebay_update_cf_settings", description: "Toggle Cloudflare performance/security settings", inputSchema: { type: "object", properties: { fqdn: { type: "string" }, dev_mode: { type: "boolean" }, always_online: { type: "boolean" }, hotlink_protection: { type: "boolean" }, rocket_loader: { type: "boolean" }, bot_fight_mode: { type: "boolean" }, email_obfuscation: { type: "boolean" }, minify_html: { type: "boolean" }, minify_css: { type: "boolean" }, minify_js: { type: "boolean" } }, required: ["fqdn"] } },
     { name: "sitebay_clear_cache", description: "Purge all Cloudflare CDN cached content for a site", inputSchema: { type: "object", properties: { fqdn: { type: "string" } }, required: ["fqdn"] } },
@@ -1709,7 +1745,7 @@ const SERVER_CARD = {
     { name: "sitebay_edit_asset", description: "Edit a Shopify theme asset using search/replace blocks", inputSchema: { type: "object", properties: { shop_name: { type: "string" }, theme_id: { type: "number" }, key: { type: "string" }, file_edit_using_search_replace_blocks: { type: "string" }, dry_run: { type: "boolean" } }, required: ["shop_name", "theme_id", "key", "file_edit_using_search_replace_blocks"] } },
     { name: "sitebay_multi_edit_assets", description: "Edit multiple Shopify theme assets in one request", inputSchema: { type: "object", properties: { shop_name: { type: "string" }, theme_id: { type: "number" }, edits: { type: "array", items: { type: "object", properties: { key: { type: "string" }, search_replace_blocks: { type: "string" } }, required: ["key", "search_replace_blocks"] } }, dry_run: { type: "boolean" } }, required: ["shop_name", "theme_id", "edits"] } },
     { name: "sitebay_duplicate_theme", description: "Duplicate a Shopify theme to create a rollback checkpoint", inputSchema: { type: "object", properties: { shop_name: { type: "string" }, theme_id: { type: "number" }, name: { type: "string" } }, required: ["shop_name", "theme_id", "name"] } },
-    { name: "sitebay_browser_admin_cookie", description: "Generate a WordPress admin auth cookie for the site", inputSchema: { type: "object", properties: { fqdn: { type: "string" } }, required: ["fqdn"] } },
+    { name: "sitebay_browser_admin_cookie", description: "Generate a Playwright-compatible cookie object for WordPress admin access on the site", inputSchema: { type: "object", properties: { fqdn: { type: "string" } }, required: ["fqdn"] } },
     { name: "sitebay_browser_goto", description: "Navigate browser to a path on the site", inputSchema: { type: "object", properties: { fqdn: { type: "string" }, path: { type: "string" } }, required: ["fqdn"] } },
     { name: "sitebay_browser_screenshot", description: "Take a screenshot of the site", inputSchema: { type: "object", properties: { fqdn: { type: "string" }, full_page: { type: "boolean" } }, required: ["fqdn"] } },
     { name: "sitebay_browser_click", description: "Click an element on the site", inputSchema: { type: "object", properties: { fqdn: { type: "string" }, selector: { type: "string" } }, required: ["fqdn", "selector"] } },
@@ -1737,7 +1773,11 @@ export default {
       });
     }
     // Extract apiKey from URL and pass as props to the Durable Object
-    const apiKey = url.searchParams.get("apiKey") ?? "";
+    let apiKey = url.searchParams.get("apiKey") ?? "";
+    if (!apiKey) {
+      const authHeader = request.headers.get("Authorization");
+      if (authHeader?.startsWith("Bearer ")) apiKey = authHeader.substring(7);
+    }
     (ctx as any).props = { apiKey };
     return mcpHandler.fetch(request, env, ctx);
   },
